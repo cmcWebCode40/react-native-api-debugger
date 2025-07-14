@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 import NetworkLogItem from './NetworkLogItem';
-// import RNShake from 'react-native-shake';
+import RNShake from 'react-native-shake';
 import type { NetworkLog, NetworkLogger } from './types';
 import Icon from './Icon';
 
@@ -40,13 +40,12 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
     if (!enableDeviceShake) {
       return;
     }
-    // const subscription = RNShake.addListener(() => {
-    //   console.log('DEvice shaked');
-    //   setShowButton(true);
-    // });
+    const subscription = RNShake.addListener(() => {
+      setShowButton(true);
+    });
     return () => {
       unsubscribe();
-      // subscription?.remove();
+      subscription?.remove();
     };
   }, [networkLogger, enableDeviceShake]);
 

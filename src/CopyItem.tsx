@@ -5,7 +5,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-// import Clipboard from '@react-native-clipboard/clipboard';
+import Clipboard from '@react-native-clipboard/clipboard';
 import Icon from './Icon';
 
 interface CopyItemProps {
@@ -32,7 +32,7 @@ export const CopyItem: React.FC<CopyItemProps> = ({
 
   const handleCopy = useCallback(async () => {
     try {
-      // Clipboard.setString(textToCopy);
+      Clipboard.setString(textToCopy);
       setCopied(true);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
