@@ -12,7 +12,7 @@ A comprehensive network request debugging tool for React Native applications. Mo
   src="/demo/demo_RN_logger.png"
   alt="Alt text"
   title="React Native API Logger"
-  style="margin:0 4px; width: 200px"
+  style="margin:0 4px; width: 100px"
 />
 
 
@@ -37,7 +37,7 @@ npm install react-native-api-debugger
 This package requires the following peer dependencies:
 
 ```bash
-npm install @react-native-clipboard/clipboard react-native-shake react-native-svg
+npm install @react-native-clipboard/clipboard react-native-shake
 ```
 
 
