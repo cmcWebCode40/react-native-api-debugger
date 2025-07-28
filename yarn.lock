@@ -11419,8 +11419,10 @@ __metadata:
     release-it: ^17.10.0
     typescript: ^5.8.3
   peerDependencies:
+    "@react-native-clipboard/clipboard": "*"
     react: "*"
     react-native: "*"
+    react-native-shake: "*"
   languageName: unknown
   linkType: soft
 
