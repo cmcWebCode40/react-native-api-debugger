@@ -117,8 +117,6 @@ class NetworkLogger {
 
         xhr.onreadystatechange = function (): void {
           if (xhr.readyState === 4) {
-            console.log(xhr.responseText, this.responseType);
-
             let responseBody: string = '';
 
             try {
@@ -147,8 +145,6 @@ class NetworkLogger {
                   responseBody = '[Unknown Response Type]';
               }
             } catch (error) {
-              console.log('error===');
-
               responseBody = `[Error reading response: ${error instanceof Error ? error.message : 'Unknown error'}]`;
             }
             requestLog.response = {
