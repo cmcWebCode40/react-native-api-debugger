@@ -111,7 +111,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
               onPress={handleCloseIcon}
               style={[styles.floatingCloseIcon]}
             >
-             <Icon type='close'/>
+              <Icon type="close" />
             </TouchableOpacity>
           )}
           <TouchableOpacity
@@ -208,8 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 25,
-    elevation: 5,
-    shadowColor: '#000',
+    elevation: 1,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
