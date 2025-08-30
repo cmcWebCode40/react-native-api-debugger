@@ -121,7 +121,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({ log }) => {
             </View>
             <View style={styles.clipboardContainer}>
               <Text style={styles.sectionTitle}>Request Headers:</Text>
-              <Text style={styles.codeText}>{formatHeaders(log.headers)}</Text>
+              {/* <Text style={styles.codeText}>{formatHeaders(log.headers)}</Text> */}
             </View>
 
             <View style={styles.clipboardContainer}>
