@@ -80,6 +80,8 @@
     "react": "19.0.0",
     "react-native": "0.79.5",
     "react-native-builder-bob": "^0.37.0",
+    "react-native-gesture-handler": "^2.24.0",
+    "react-native-reanimated": "^3.19.1",
     "react-native-shake": "^6.7.8",
     "release-it": "^17.10.0",
     "typescript": "^5.8.3"
@@ -88,6 +90,8 @@
     "@react-native-clipboard/clipboard": "*",
     "react": "*",
     "react-native": "*",
+    "react-native-gesture-handler": "2.24.0",
+    "react-native-reanimated": "3.19.1",
     "react-native-shake": "*"
   },
   "workspaces": [
