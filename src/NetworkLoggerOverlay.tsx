@@ -15,24 +15,29 @@ import {
 import NetworkLogItem from './NetworkLogItem';
 import RNShake from 'react-native-shake';
 import type { NetworkLog, NetworkLogger } from './types';
-import Icon from './Icon';
+import FloatingButton from './FloatingButton';
+import NonFloatingButton from './NonFloatingButton';
 
 interface NetworkLoggerOverlayProps {
   networkLogger: NetworkLogger;
   enableDeviceShake?: boolean;
+  showRequestHeader?: boolean;
+  showResponseHeader?: boolean;
+  draggable?: boolean;
 }
 
 export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
+  draggable,
   networkLogger,
   enableDeviceShake,
+  showRequestHeader,
+  showResponseHeader,
 }) => {
   const [visible, setVisible] = useState<boolean>(false);
   const [logs, setLogs] = useState<NetworkLog[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [apiFilterActive, setApiFilterActive] = useState<boolean>(false);
-  const [showButton, setShowButton] = useState<boolean>(
-    enableDeviceShake ? false : true
-  );
+  const [showButton, setShowButton] = useState<boolean>(!enableDeviceShake);
 
   useEffect(() => {
     const unsubscribe = networkLogger.subscribe(setLogs);
@@ -93,7 +98,11 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   };
 
   const renderLogItem: ListRenderItem<NetworkLog> = ({ item }) => (
-    <NetworkLogItem log={item} />
+    <NetworkLogItem
+      log={item}
+      showResponseHeader={showResponseHeader}
+      showRequestHeader={showRequestHeader}
+    />
   );
 
   const renderEmptyList = (): React.ReactElement => (
@@ -102,27 +111,21 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
 
   const keyExtractor = (item: NetworkLog): string => item.id.toString();
 
+  const buttonProps = {
+    enableDeviceShake,
+    hideIcon: handleCloseIcon,
+    openModal: handleModalOpen,
+    logsLength: logs.length,
+  };
+
   return (
     <>
-      {showButton && (
-        <View>
-          {enableDeviceShake && (
-            <TouchableOpacity
-              onPress={handleCloseIcon}
-              style={[styles.floatingCloseIcon]}
-            >
-              <Icon type="close" />
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={styles.floatingButton}
-            onPress={handleModalOpen}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.floatingButtonText}>📊 {logs.length}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {showButton &&
+        (draggable ? (
+          <FloatingButton {...buttonProps} />
+        ) : (
+          <NonFloatingButton {...buttonProps} />
+        ))}
       <Modal
         visible={visible}
         animationType="slide"
