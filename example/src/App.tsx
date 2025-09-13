@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { networkLogger, NetworkLoggerOverlay } from 'react-native-api-debugger';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 interface LoadingState {
   [key: string]: boolean;
@@ -229,78 +230,84 @@ const App: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>API Logger Test App</Text>
-          <Text style={styles.headerSubtitle}>
-            Test network requests and view them in the logger
-          </Text>
-        </View>
-
-        <View style={styles.body}>
-          <Text style={styles.sectionTitle}>GET Requests</Text>
-          <View style={styles.buttonRow}>
-            <ButtonComponent
-              title="Get Posts"
-              onPress={handleGetPosts}
-              buttonId="getPosts"
-              color="#4CAF50"
-              loading={loading.getPosts}
-            />
-            <ButtonComponent
-              title="Get Users"
-              onPress={handleGetUsers}
-              buttonId="getUsers"
-              color="#2196F3"
-              loading={loading.getUsers}
-            />
-          </View>
-
-          <Text style={styles.sectionTitle}>POST Requests</Text>
-          <View style={styles.buttonRow}>
-            <ButtonComponent
-              title="Create Post"
-              onPress={handleCreatePost}
-              buttonId="createPost"
-              color="#FF9800"
-              loading={loading.createPost}
-            />
-            <ButtonComponent
-              title="Create User"
-              onPress={handleCreateUser}
-              buttonId="createUser"
-              color="#9C27B0"
-              loading={loading.createUser}
-            />
-          </View>
-
-          <Text style={styles.sectionTitle}>Error & Edge Cases</Text>
-          <View style={styles.buttonRow}>
-            <ButtonComponent
-              title="Test 404 Error"
-              onPress={handleErrorRequest}
-              buttonId="errorRequest"
-              color="#F44336"
-              loading={loading.errorRequest}
-            />
-          </View>
-
-          <View style={styles.instructions}>
-            <Text style={styles.instructionsTitle}>📊 How to use:</Text>
-            <Text style={styles.instructionsText}>
-              1. Tap any button to make an API request{'\n'}
-              2. Check the floating network logger button{'\n'}
-              3. Tap the logger to view request details{'\n'}
-              4. Expand requests to see headers & responses{'\n'}
-              5. Use cURL generation for debugging
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>API Logger Test App</Text>
+            <Text style={styles.headerSubtitle}>
+              Test network requests and view them in the logger
             </Text>
           </View>
-        </View>
-      </ScrollView>
 
-      <NetworkLoggerOverlay networkLogger={networkLogger} />
-    </SafeAreaView>
+          <View style={styles.body}>
+            <Text style={styles.sectionTitle}>GET Requests</Text>
+            <View style={styles.buttonRow}>
+              <ButtonComponent
+                title="Get Posts"
+                onPress={handleGetPosts}
+                buttonId="getPosts"
+                color="#4CAF50"
+                loading={loading.getPosts}
+              />
+              <ButtonComponent
+                title="Get Users"
+                onPress={handleGetUsers}
+                buttonId="getUsers"
+                color="#2196F3"
+                loading={loading.getUsers}
+              />
+            </View>
+
+            <Text style={styles.sectionTitle}>POST Requests</Text>
+            <View style={styles.buttonRow}>
+              <ButtonComponent
+                title="Create Post"
+                onPress={handleCreatePost}
+                buttonId="createPost"
+                color="#FF9800"
+                loading={loading.createPost}
+              />
+              <ButtonComponent
+                title="Create User"
+                onPress={handleCreateUser}
+                buttonId="createUser"
+                color="#9C27B0"
+                loading={loading.createUser}
+              />
+            </View>
+
+            <Text style={styles.sectionTitle}>Error & Edge Cases</Text>
+            <View style={styles.buttonRow}>
+              <ButtonComponent
+                title="Test 404 Error"
+                onPress={handleErrorRequest}
+                buttonId="errorRequest"
+                color="#F44336"
+                loading={loading.errorRequest}
+              />
+            </View>
+
+            <View style={styles.instructions}>
+              <Text style={styles.instructionsTitle}>📊 How to use:</Text>
+              <Text style={styles.instructionsText}>
+                1. Tap any button to make an API request{'\n'}
+                2. Check the floating network logger button{'\n'}
+                3. Tap the logger to view request details{'\n'}
+                4. Expand requests to see headers & responses{'\n'}
+                5. Use cURL generation for debugging
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+        <NetworkLoggerOverlay
+          networkLogger={networkLogger}
+          showRequestHeader={false}
+          showResponseHeader={false}
+          draggable={true}
+        />
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 
@@ -308,6 +315,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingTop: '5%',
   },
   scrollContent: {
     flexGrow: 1,
