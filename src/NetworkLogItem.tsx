@@ -12,9 +12,15 @@ import Icon from './Icon';
 
 interface NetworkLogItemProps {
   log: NetworkLog;
+  showRequestHeader?: boolean;
+  showResponseHeader?: boolean;
 }
 
-const NetworkLogItem: React.FC<NetworkLogItemProps> = ({ log }) => {
+const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
+  log,
+  showResponseHeader = false,
+  showRequestHeader = false,
+}) => {
   const [expanded, setExpanded] = useState<boolean>(false);
 
   const getStatusColor = (status?: number): string => {
@@ -42,19 +48,21 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({ log }) => {
     }
   };
 
-  const generateCurl = (log: NetworkLog): string => {
-    let curl: string = `curl -X ${log.method}`;
+  const generateCurl = (apiLog: NetworkLog): string => {
+    let curl: string = `curl -X ${apiLog.method}`;
 
-    if (log.headers && typeof log.headers === 'object') {
-      Object.entries(log.headers).forEach(([key, value]: [string, string]) => {
-        curl += ` \\\n  -H "${key}: ${value}"`;
-      });
+    if (apiLog.headers && typeof apiLog.headers === 'object') {
+      Object.entries(apiLog.headers).forEach(
+        ([key, value]: [string, string]) => {
+          curl += ` \\\n  -H "${key}: ${value}"`;
+        }
+      );
     }
 
-    if (log.body) {
-      curl += ` \\\n  -d '${log.body}'`;
+    if (apiLog.body) {
+      curl += ` \\\n  -d '${apiLog.body}'`;
     }
-    curl += ` \\\n  "${log.url}"`;
+    curl += ` \\\n  "${apiLog.url}"`;
     return curl;
   };
 
@@ -119,11 +127,14 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({ log }) => {
                 textToCopy={generateCurl(log)}
               />
             </View>
-            <View style={styles.clipboardContainer}>
-              <Text style={styles.sectionTitle}>Request Headers:</Text>
-              {/* <Text style={styles.codeText}>{formatHeaders(log.headers)}</Text> */}
-            </View>
-
+            {showRequestHeader && (
+              <View style={styles.clipboardContainer}>
+                <Text style={styles.sectionTitle}>Request Headers:</Text>
+                <Text style={styles.codeText}>
+                  {formatHeaders(log.headers)}
+                </Text>
+              </View>
+            )}
             <View style={styles.clipboardContainer}>
               {log.body && (
                 <>
@@ -135,12 +146,14 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({ log }) => {
 
             {log.response && (
               <>
-                <View style={styles.clipboardContainer}>
-                  <Text style={styles.sectionTitle}>Response Headers:</Text>
-                  <Text style={styles.codeText}>
-                    {formatHeaders(log.response.headers)}
-                  </Text>
-                </View>
+                {showResponseHeader && (
+                  <View style={styles.clipboardContainer}>
+                    <Text style={styles.sectionTitle}>Response Headers:</Text>
+                    <Text style={styles.codeText}>
+                      {formatHeaders(log.response.headers)}
+                    </Text>
+                  </View>
+                )}
 
                 <View style={styles.clipboardContainer}>
                   <Text style={styles.sectionTitle}>Response Body:</Text>
