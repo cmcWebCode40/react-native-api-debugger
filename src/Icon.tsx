@@ -22,7 +22,7 @@ export default Icon;
 
 const styles = StyleSheet.create({
   closeButton: {
-    fontSize: 18,
+    fontSize: 20,
     color: '#666',
     fontWeight: 'bold',
   },
