@@ -4,12 +4,12 @@ A comprehensive network request debugging tool for React Native applications. Mo
 
 [![Version](https://img.shields.io/npm/v/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
 [![Downloads](https://img.shields.io/npm/dm/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
-[![License](https://img.shields.io/npm/l/react-native-api-debugger)](https://github.com/your-username/react-native-api-debugger/blob/main/LICENSE)
+[![License](https://img.shields.io/npm/l/react-native-api-debugger)](https://github.com/cmcWebCode40/react-native-api-debugger/blob/main/LICENSE)
 [![Platform](https://img.shields.io/badge/platform-react--native-blue)](https://reactnative.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-supported-blue)](https://www.typescriptlang.org/)
 
 
-![React Native API Debugger](demo/demo.gif)
+![React Native API Debugger](demo/rn-api-debugger-demo.gif)
 
 ## ✨ Features
 
@@ -343,7 +343,7 @@ export default function App() {
 We welcome contributions! Here's how to get started:
 
 1. **Fork the repository**
-2. **Clone your fork**: `git clone https://github.com/your-username/react-native-api-debugger.git`
+2. **Clone your fork**: `git clone https://github.com/cmcWebCode40/react-native-api-debugger.git`
 3. **Install dependencies**: `npm install`
 4. **Create a feature branch**: `git checkout -b feature/amazing-feature`
 5. **Make your changes** and add tests
@@ -356,7 +356,7 @@ We welcome contributions! Here's how to get started:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/react-native-api-debugger.git
+git clone https://github.com/cmcWebCode40/react-native-api-debugger.git
 
 # Install dependencies
 cd react-native-api-debugger
@@ -377,19 +377,15 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support & Community
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/your-username/react-native-api-debugger/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/your-username/react-native-api-debugger/discussions)
-- 📖 **Documentation**: [Wiki](https://github.com/your-username/react-native-api-debugger/wiki)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/cmcWebCode40/react-native-api-debugger/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/cmcWebCode40/react-native-api-debugger/discussions)
+- 📖 **Documentation**: [Wiki](https://github.com/cmcWebCode40/react-native-api-debugger/wiki)
 - 💬 **Community**: [Discord Server](https://discord.gg/your-discord)
 - 🐦 **Updates**: [@YourTwitter](https://twitter.com/your-twitter)
 
 ## 📊 Stats & Recognition
 
 <div align="center">
-
-[![GitHub stars](https://img.shields.io/github/stars/your-username/react-native-api-debugger?style=social)](https://github.com/your-username/react-native-api-debugger)
-[![GitHub forks](https://img.shields.io/github/forks/your-username/react-native-api-debugger?style=social)](https://github.com/your-username/react-native-api-debugger)
-[![Twitter Follow](https://img.shields.io/twitter/follow/your-twitter?style=social)](https://twitter.com/your-twitter)
 
 **Made with ❤️ for the React Native community**
 
