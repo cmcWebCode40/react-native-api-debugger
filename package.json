@@ -1,6 +1,6 @@
 {
   "name": "react-native-api-debugger",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "API logger/visualizer for react native mobile application",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
