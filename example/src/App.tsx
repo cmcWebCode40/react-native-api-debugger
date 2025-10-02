@@ -230,7 +230,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.root}>
       <SafeAreaView style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
@@ -314,6 +314,7 @@ const App: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

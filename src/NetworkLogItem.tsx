@@ -165,7 +165,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
                   </Text>
                   <CopyItem
                     useCopyToClipboard={useCopyToClipboard}
-                    style={[styles.copyToClipboard, { top: '30%' }]}
+                    style={[styles.copyToClipboard, styles.copyItemPosition]}
                     textToCopy={formatBody(log.response.body)}
                   />
                 </View>
@@ -175,7 +175,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
             {log.error && (
               <>
                 <Text style={styles.sectionTitle}>Error:</Text>
-                <Text style={[styles.codeText, { color: '#F44336' }]}>
+                <Text style={[styles.codeText, styles.errorColor]}>
                   {log.error}
                 </Text>
               </>
@@ -188,6 +188,8 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
 };
 
 const styles = StyleSheet.create({
+  errorColor: { color: '#F44336' },
+  copyItemPosition: { top: '30%' },
   logItem: {
     backgroundColor: '#fff',
     marginBottom: 8,
