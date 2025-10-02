@@ -1,6 +1,5 @@
 import type { LogListener, NetworkLog, NetworkRequestHeaders } from './types';
 
-// Custom XMLHttpRequest interface to handle our modifications
 interface CustomXMLHttpRequest extends XMLHttpRequest {
   open: (method: string, url: string) => void;
   send: (body?: Document | any | null) => void;
