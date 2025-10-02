@@ -314,7 +314,9 @@ const App: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
