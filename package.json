@@ -87,12 +87,12 @@
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
-    "@react-native-clipboard/clipboard": "*",
     "react": "*",
     "react-native": "*",
     "react-native-gesture-handler": "2.24.0",
     "react-native-reanimated": "3.19.1",
-    "react-native-shake": "*"
+    "react-native-shake": "*",
+    "@react-native-clipboard/clipboard": "*"
   },
   "workspaces": [
     "example"
