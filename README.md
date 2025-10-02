@@ -8,7 +8,7 @@ A comprehensive network request debugging tool for React Native applications. Mo
 [![Platform](https://img.shields.io/badge/platform-react--native-blue)](https://reactnative.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-supported-blue)](https://www.typescriptlang.org/)
 
-![React Native API Debugger](demo/lib-demo.gif)
+<img src="demo/lib-demo.gif" alt="React Native API Debugger" style="width: 50%;" />
 
 ## ✨ Features
 
