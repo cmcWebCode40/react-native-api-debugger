@@ -13,10 +13,17 @@ import {
 } from 'react-native';
 
 import NetworkLogItem from './NetworkLogItem';
-import RNShake from 'react-native-shake';
 import type { NetworkLog, NetworkLogger } from './types';
 import FloatingButton from './FloatingButton';
 import NonFloatingButton from './NonFloatingButton';
+
+let RNShake: any = null;
+
+try {
+  RNShake = require('react-native-shake').default;
+} catch (error) {
+  RNShake = null;
+}
 
 interface NetworkLoggerOverlayProps {
   networkLogger: NetworkLogger;
@@ -24,6 +31,7 @@ interface NetworkLoggerOverlayProps {
   showRequestHeader?: boolean;
   showResponseHeader?: boolean;
   draggable?: boolean;
+  useCopyToClipboard?: boolean;
 }
 
 export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
@@ -32,6 +40,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   enableDeviceShake,
   showRequestHeader,
   showResponseHeader,
+  useCopyToClipboard,
 }) => {
   const [visible, setVisible] = useState<boolean>(false);
   const [logs, setLogs] = useState<NetworkLog[]>([]);
@@ -41,6 +50,12 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
 
   useEffect(() => {
     const unsubscribe = networkLogger.subscribe(setLogs);
+
+    if (enableDeviceShake && !RNShake) {
+      throw new Error(
+        'react-native-shake is required to enableDeviceShake but module is not installed. Please install it with: npm install react-native-shake'
+      );
+    }
 
     if (!enableDeviceShake) {
       return;
@@ -100,6 +115,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   const renderLogItem: ListRenderItem<NetworkLog> = ({ item }) => (
     <NetworkLogItem
       log={item}
+      useCopyToClipboard={useCopyToClipboard}
       showResponseHeader={showResponseHeader}
       showRequestHeader={showRequestHeader}
     />
@@ -112,6 +128,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   const keyExtractor = (item: NetworkLog): string => item.id.toString();
 
   const buttonProps = {
+    draggable,
     enableDeviceShake,
     hideIcon: handleCloseIcon,
     openModal: handleModalOpen,
