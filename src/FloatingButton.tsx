@@ -5,16 +5,43 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import React from 'react';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import React, { useEffect } from 'react';
 import Icon from './Icon';
-
+import NonFloatingButton from './NonFloatingButton';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+let Animated: any = null;
+let Reanimated: any = null;
+let useSharedValue: any = null;
+let useAnimatedStyle: any = null;
+let withSpring: any = null;
+let Gesture: any = null;
+let GestureDetector: any = null;
+
+let librariesAvailable = false;
+
+try {
+  Animated = require('react-native-reanimated').default;
+  Reanimated = require('react-native-reanimated');
+  useSharedValue = Reanimated.useSharedValue;
+  useAnimatedStyle = Reanimated.useAnimatedStyle;
+  withSpring = Reanimated.withSpring;
+
+  const gestureHandler = require('react-native-gesture-handler');
+  Gesture = gestureHandler.Gesture;
+  GestureDetector = gestureHandler.GestureDetector;
+
+  librariesAvailable = !!(
+    Animated &&
+    useSharedValue &&
+    useAnimatedStyle &&
+    withSpring &&
+    Gesture &&
+    GestureDetector
+  );
+} catch (error) {
+  librariesAvailable = false;
+}
 
 const BUTTON_SIZE = 58;
 const CLOSE_BUTTON_SIZE = 58;
@@ -24,21 +51,20 @@ interface FloatingButtonProps {
   openModal: () => void;
   hideIcon: () => void;
   logsLength: number;
+  draggable?: boolean;
   enableDeviceShake?: boolean;
 }
 
-const FloatingButton: React.FunctionComponent<FloatingButtonProps> = ({
+const AnimatedFloatingButton: React.FC<FloatingButtonProps> = ({
   hideIcon,
-  logsLength,
   openModal,
+  logsLength,
   enableDeviceShake,
 }) => {
   const positionX = useSharedValue(screenWidth - BUTTON_SIZE - PADDING);
   const positionY = useSharedValue(screenHeight - 150);
-
   const startPositionX = useSharedValue(0);
   const startPositionY = useSharedValue(0);
-
   const isDragging = useSharedValue(false);
 
   const panGesture = Gesture.Pan()
@@ -47,7 +73,7 @@ const FloatingButton: React.FunctionComponent<FloatingButtonProps> = ({
       startPositionX.value = positionX.value;
       startPositionY.value = positionY.value;
     })
-    .onUpdate((event) => {
+    .onUpdate((event: { translationX: any; translationY: any }) => {
       const newX = startPositionX.value + event.translationX;
       const newY = startPositionY.value + event.translationY;
 
@@ -111,6 +137,24 @@ const FloatingButton: React.FunctionComponent<FloatingButtonProps> = ({
   );
 };
 
+const FloatingButton: React.FC<FloatingButtonProps> = (props) => {
+  const { draggable } = props;
+
+  useEffect(() => {
+    if (draggable && !librariesAvailable) {
+      throw new Error(
+        `Missing Libraries: Required libraries "react-native-reanimated" and "react-native-gesture-handler" are not installed. Please install them to enable this feature.\n\nRun:\n\nnpm install react-native-reanimated react-native-gesture-handler\n\nand rebuild your app.`
+      );
+    }
+  }, [draggable]);
+
+  if (!librariesAvailable || !draggable) {
+    return <NonFloatingButton {...props} />;
+  }
+
+  return <AnimatedFloatingButton {...props} />;
+};
+
 const styles = StyleSheet.create({
   gestureRoot: {
     flex: 1,
@@ -134,6 +178,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex: 1000,
   },
+  staticPosition: {
+    left: screenWidth - BUTTON_SIZE - PADDING,
+    top: screenHeight - 150,
+  },
   buttonTouchable: {
     backgroundColor: '#007AFF',
     padding: 16,
@@ -148,6 +196,10 @@ const styles = StyleSheet.create({
   floatingCloseIcon: {
     position: 'absolute',
     zIndex: 1001,
+  },
+  staticClosePosition: {
+    left: screenWidth - BUTTON_SIZE - PADDING + 4,
+    top: screenHeight - 150 - 50,
   },
   closeButton: {
     padding: 16,
