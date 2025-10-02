@@ -301,10 +301,12 @@ const App: React.FC = () => {
           </View>
         </ScrollView>
         <NetworkLoggerOverlay
-          networkLogger={networkLogger}
+          draggable={true}
+          enableDeviceShake={false}
+          useCopyToClipboard={true}
           showRequestHeader={false}
           showResponseHeader={false}
-          draggable={true}
+          networkLogger={networkLogger}
         />
       </SafeAreaView>
     </GestureHandlerRootView>
