@@ -14,10 +14,12 @@ interface NetworkLogItemProps {
   log: NetworkLog;
   showRequestHeader?: boolean;
   showResponseHeader?: boolean;
+  useCopyToClipboard?: boolean;
 }
 
 const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
   log,
+  useCopyToClipboard,
   showResponseHeader = false,
   showRequestHeader = false,
 }) => {
@@ -117,7 +119,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
           <ScrollView
             style={styles.detailsScroll}
             nestedScrollEnabled={true} // This is the crucial fix
-            showsVerticalScrollIndicator={true}
+            showsVerticalScrollIndicator={false}
             bounces={false}
           >
             <View>
@@ -125,6 +127,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
               <CopyItem
                 style={styles.copyToClipboard}
                 textToCopy={generateCurl(log)}
+                useCopyToClipboard={useCopyToClipboard}
               />
             </View>
             {showRequestHeader && (
@@ -161,6 +164,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
                     {formatBody(log.response.body)}
                   </Text>
                   <CopyItem
+                    useCopyToClipboard={useCopyToClipboard}
                     style={[styles.copyToClipboard, { top: '30%' }]}
                     textToCopy={formatBody(log.response.body)}
                   />
