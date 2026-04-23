@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Switch,
 } from 'react-native';
 import { networkLogger, NetworkLoggerOverlay } from 'react-native-api-debugger';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -72,8 +73,15 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState<LoadingState>({});
+  const [showHeaders, setShowHeaders] = useState<boolean>(false);
 
   useEffect(() => {
+    networkLogger.configure({
+      maxLogs: 50,
+      ignoredUrls: ['/health', '/ping'],
+      ignoredDomains: ['analytics.example.com'],
+      slowRequestThreshold: 2000,
+    });
     networkLogger.setupInterceptor();
   }, []);
 
@@ -214,7 +222,7 @@ const App: React.FC = () => {
     );
   };
 
-  // Test Error Request
+  // Test Error Request (404)
   const handleErrorRequest = async (): Promise<void> => {
     await makeAPIRequest(
       'https://jsonplaceholder.typicode.com/posts/999999',
@@ -227,6 +235,52 @@ const App: React.FC = () => {
       'errorRequest',
       () => 'Unexpected success'
     );
+  };
+
+  // Test Server Error (500)
+  const handleServerError = async (): Promise<void> => {
+    await makeAPIRequest(
+      'https://httpstat.us/500',
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+      'serverError',
+      () => 'Unexpected success'
+    );
+  };
+
+  // Test Slow Request
+  const handleSlowRequest = async (): Promise<void> => {
+    await makeAPIRequest(
+      'https://httpstat.us/200?sleep=3000',
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+      'slowRequest',
+      () => 'Slow request completed'
+    );
+  };
+
+  // Test Ignored URL (should not appear in logs)
+  const handleIgnoredRequest = async (): Promise<void> => {
+    setButtonLoading('ignoredRequest', true);
+    try {
+      await fetch('https://jsonplaceholder.typicode.com/health');
+      Alert.alert(
+        'Ignored Request',
+        'This request should NOT appear in the network logger because "/health" is in the ignored URLs list.'
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Request failed');
+    } finally {
+      setButtonLoading('ignoredRequest', false);
+    }
   };
 
   return (
@@ -280,11 +334,45 @@ const App: React.FC = () => {
             <Text style={styles.sectionTitle}>Error & Edge Cases</Text>
             <View style={styles.buttonRow}>
               <ButtonComponent
-                title="Test 404 Error"
+                title="Test 404"
                 onPress={handleErrorRequest}
                 buttonId="errorRequest"
                 color="#F44336"
                 loading={loading.errorRequest}
+              />
+              <ButtonComponent
+                title="Test 500"
+                onPress={handleServerError}
+                buttonId="serverError"
+                color="#9C27B0"
+                loading={loading.serverError}
+              />
+            </View>
+            <View style={styles.buttonRow}>
+              <ButtonComponent
+                title="Slow Request"
+                onPress={handleSlowRequest}
+                buttonId="slowRequest"
+                color="#FF5722"
+                loading={loading.slowRequest}
+              />
+              <ButtonComponent
+                title="Ignored URL"
+                onPress={handleIgnoredRequest}
+                buttonId="ignoredRequest"
+                color="#607D8B"
+                loading={loading.ignoredRequest}
+              />
+            </View>
+
+            <Text style={styles.sectionTitle}>Display Settings</Text>
+            <View style={styles.settingRow}>
+              <Text style={styles.settingLabel}>Show Headers</Text>
+              <Switch
+                value={showHeaders}
+                onValueChange={setShowHeaders}
+                trackColor={{ false: '#e0e0e0', true: '#81b0ff' }}
+                thumbColor={showHeaders ? '#007AFF' : '#f4f3f4'}
               />
             </View>
 
@@ -294,19 +382,41 @@ const App: React.FC = () => {
                 1. Tap any button to make an API request{'\n'}
                 2. Check the floating network logger button{'\n'}
                 3. Tap the logger to view request details{'\n'}
-                4. Expand requests to see headers & responses{'\n'}
-                5. Use cURL generation for debugging
+                4. Use filter chips (2xx, 4xx, 5xx, Errors) to filter logs{'\n'}
+                5. Search by URL, method, or response body{'\n'}
+                6. Expand requests to see headers & responses{'\n'}
+                7. Use cURL generation for debugging
+              </Text>
+            </View>
+
+            <View style={styles.configInfo}>
+              <Text style={styles.configTitle}>⚙️ Current Config:</Text>
+              <Text style={styles.configText}>
+                • Max Logs: 50{'\n'}• Ignored URLs: /health, /ping{'\n'}• Slow
+                Request Threshold: 2000ms{'\n'}• Dev Mode Only: enabled
+                (default)
+              </Text>
+            </View>
+
+            <View style={styles.devModeInfo}>
+              <Text style={styles.devModeTitle}>🔒 Production Safety:</Text>
+              <Text style={styles.devModeText}>
+                The network logger only shows in development builds by default
+                (__DEV__). This prevents accidental exposure of sensitive API
+                data in production apps.
               </Text>
             </View>
           </View>
         </ScrollView>
+        {/* enabled defaults to __DEV__, so it only shows in development builds */}
         <NetworkLoggerOverlay
           draggable={true}
           enableDeviceShake={false}
           useCopyToClipboard={true}
-          showRequestHeader={false}
-          showResponseHeader={false}
+          showRequestHeader={showHeaders}
+          showResponseHeader={showHeaders}
           networkLogger={networkLogger}
+          // enabled={true} // Uncomment to force enable in production (not recommended)
         />
       </SafeAreaView>
     </GestureHandlerRootView>
@@ -400,6 +510,59 @@ const styles = StyleSheet.create({
   instructionsText: {
     fontSize: 14,
     color: '#666',
+    lineHeight: 22,
+  },
+  configInfo: {
+    backgroundColor: '#E3F2FD',
+    padding: 20,
+    borderRadius: 12,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#BBDEFB',
+  },
+  configTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976D2',
+    marginBottom: 10,
+  },
+  configText: {
+    fontSize: 13,
+    color: '#1565C0',
+    lineHeight: 20,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  settingLabel: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  devModeInfo: {
+    backgroundColor: '#FCE4EC',
+    padding: 20,
+    borderRadius: 12,
+    marginTop: 16,
+    marginBottom: 40,
+    borderWidth: 1,
+    borderColor: '#F8BBD9',
+  },
+  devModeTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#C2185B',
+    marginBottom: 10,
+  },
+  devModeText: {
+    fontSize: 13,
+    color: '#AD1457',
     lineHeight: 20,
   },
 });
