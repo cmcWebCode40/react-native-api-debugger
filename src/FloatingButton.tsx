@@ -8,6 +8,7 @@ import {
 import React, { useEffect } from 'react';
 import Icon from './Icon';
 import NonFloatingButton from './NonFloatingButton';
+import { colors } from './constants/colors';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 let Animated: any = null;
@@ -51,6 +52,7 @@ interface FloatingButtonProps {
   openModal: () => void;
   hideIcon: () => void;
   logsLength: number;
+  errorCount?: number;
   draggable?: boolean;
   enableDeviceShake?: boolean;
 }
@@ -59,6 +61,7 @@ const AnimatedFloatingButton: React.FC<FloatingButtonProps> = ({
   hideIcon,
   openModal,
   logsLength,
+  errorCount = 0,
   enableDeviceShake,
 }) => {
   const positionX = useSharedValue(screenWidth - BUTTON_SIZE - PADDING);
@@ -130,6 +133,13 @@ const AnimatedFloatingButton: React.FC<FloatingButtonProps> = ({
             style={styles.buttonTouchable}
           >
             <Text style={styles.floatingButtonText}>📊 {logsLength}</Text>
+            {errorCount > 0 && (
+              <View style={styles.errorBadge}>
+                <Text style={styles.errorBadgeText}>
+                  {errorCount > 99 ? '99+' : errorCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </Animated.View>
       </GestureDetector>
@@ -213,6 +223,25 @@ const styles = StyleSheet.create({
   floatingButtonText: {
     color: 'white',
     fontSize: 14,
+    fontWeight: 'bold',
+  },
+  errorBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: colors.error,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  errorBadgeText: {
+    color: '#fff',
+    fontSize: 10,
     fontWeight: 'bold',
   },
 });

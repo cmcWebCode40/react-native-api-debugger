@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import Icon from './Icon';
+import { colors } from './constants/colors';
 
 const CLOSE_BUTTON_SIZE = 58;
 
@@ -8,12 +9,14 @@ interface NonFloatingButtonProps {
   openModal: () => void;
   hideIcon: () => void;
   logsLength: number;
+  errorCount?: number;
   enableDeviceShake?: boolean;
 }
 
 const NonFloatingButton: React.FunctionComponent<NonFloatingButtonProps> = ({
   hideIcon,
   logsLength,
+  errorCount = 0,
   openModal,
   enableDeviceShake,
 }) => {
@@ -29,6 +32,13 @@ const NonFloatingButton: React.FunctionComponent<NonFloatingButtonProps> = ({
       <View style={[styles.floatingButton]}>
         <TouchableOpacity onPress={openModal} activeOpacity={0.9}>
           <Text style={styles.floatingButtonText}>📊 {logsLength}</Text>
+          {errorCount > 0 && (
+            <View style={styles.errorBadge}>
+              <Text style={styles.errorBadgeText}>
+                {errorCount > 99 ? '99+' : errorCount}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
     </>
@@ -69,7 +79,25 @@ const styles = StyleSheet.create({
     height: CLOSE_BUTTON_SIZE,
     justifyContent: 'center',
     alignItems: 'center',
-    fontWeight: '900',
+  },
+  errorBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: colors.error,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  errorBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
 
