@@ -1,65 +1,68 @@
 # React Native API Debugger
 
-A comprehensive network request debugging tool for React Native applications. Monitor, inspect, and debug all your app's network requests with an intuitive draggable overlay interface.
+A network request debugging tool for React Native applications. Monitor, inspect, and debug HTTP requests with a draggable overlay interface.
 
-[![Version](https://img.shields.io/npm/v/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
-[![Downloads](https://img.shields.io/npm/dm/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
-[![License](https://img.shields.io/npm/l/react-native-api-debugger)](https://github.com/cmcWebCode40/react-native-api-debugger/blob/main/LICENSE)
-[![Platform](https://img.shields.io/badge/platform-react--native-blue)](https://reactnative.dev/)
-[![TypeScript](https://img.shields.io/badge/typescript-supported-blue)](https://www.typescriptlang.org/)
+[![npm version](https://img.shields.io/npm/v/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
+[![downloads](https://img.shields.io/npm/dm/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
+[![license](https://img.shields.io/npm/l/react-native-api-debugger)](https://github.com/cmcWebCode40/react-native-api-debugger/blob/main/LICENSE)
 
-<img src="demo/lib-demo.gif" alt="React Native API Debugger" style="width: 50%;" />
+<img src="demo/lib-demo.gif" alt="React Native API Debugger Demo" width="300" />
 
-## ✨ Features
+## Features
 
-- 🔍 **Real-time Network Monitoring** - Automatically intercepts all `fetch()` and `XMLHttpRequest` calls
-- 🎯 **Draggable Overlay Interface** - Non-intrusive floating button that can be moved anywhere on screen
-- 📊 **Comprehensive Request Details** - View headers, body, response, timing, and status codes
-- 📋 **cURL Generation** - Copy requests as cURL commands for easy debugging
-- 🔎 **Advanced Filtering** - Search and filter by URL, method, status, or API endpoints
-- ❌ **Error Tracking** - Easily identify failed requests and network errors
-- 📱 **Device Shake Support** - Optional shake-to-show/hide functionality
-- 📋 **Copy to Clipboard** - Optionally copy request/response/cURL details
-- 🎨 **Customizable UI** - Configure header visibility and other display options
-- 🚀 **TypeScript Support** - Full TypeScript definitions included
-- 💾 **Memory Efficient** - Automatic cleanup with configurable request limits
+- **Network Interception** - Automatically captures all `fetch()` and `XMLHttpRequest` calls
+- **Draggable Overlay** - Floating button that can be positioned anywhere on screen
+- **Request Details** - View headers, body, response, timing, and status codes
+- **cURL Export** - Copy requests as cURL commands
+- **Advanced Filtering** - Filter by status code (2xx, 3xx, 4xx, 5xx), search by URL/method/body
+- **Export Logs** - Export to HAR, Postman Collection, or JSON formats
+- **Request Replay** - Re-execute captured requests with optional modifications
+- **Dark/Light Theme** - Toggle between themes
+- **Slow Request Detection** - Visual indicator for requests exceeding threshold
+- **Sensitive Data Redaction** - Detect and mask sensitive headers and body fields
+- **Individual Log Deletion** - Remove specific entries without clearing all logs
+- **Device Shake Support** - Shake to show/hide the debugger
+- **TypeScript Support** - Full type definitions included
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install react-native-api-debugger
+# or
+yarn add react-native-api-debugger
 ```
-
-> **Note:** Features like draggable overlay, device shake, and clipboard copy require additional peer dependencies.  
-> The debugger will throw a clear error if you enable a feature and the relevant library is not installed.
 
 ### Optional Peer Dependencies
 
-Install these only if you need advanced features:
+Install only what you need:
+
+| Package | Required For |
+|---------|--------------|
+| `react-native-gesture-handler` | Draggable floating button |
+| `react-native-reanimated` | Smooth drag animations |
+| `react-native-shake` | Device shake detection |
+| `@react-native-clipboard/clipboard` | Copy to clipboard |
 
 ```bash
-npm install @react-native-clipboard/clipboard     # For copy to clipboard
-npm install react-native-shake                   # For device shake to show/hide
-npm install react-native-gesture-handler         # For draggable floating button
-npm install react-native-reanimated              # (Required for gesture handler)
+# For draggable button
+npm install react-native-gesture-handler react-native-reanimated
+
+# For device shake
+npm install react-native-shake
+
+# For clipboard
+npm install @react-native-clipboard/clipboard
 ```
 
-> **Note:** For Expo SDK ≤ 53, use `react-native-reanimated` version 3.x.x
-
-### Platform Setup
-
-If you use **draggable overlay** or **device shake**, also follow their respective setup guides:
-
-- **react-native-gesture-handler**: [Installation Guide](https://docs.swmansion.com/react-native-gesture-handler/docs/installation)
-- **react-native-reanimated**: [Installation Guide](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started)
+> For Expo SDK ≤ 53, use `react-native-reanimated` version 3.x.x
 
 ---
 
-## 🚀 Quick Start
+## Quick Setup
 
-### Minimal Example
+### 1. Basic Usage (No Dependencies)
 
-```typescript
+```tsx
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import { networkLogger, NetworkLoggerOverlay } from 'react-native-api-debugger';
@@ -72,262 +75,341 @@ export default function App() {
   return (
     <View style={{ flex: 1 }}>
       {/* Your app content */}
-
-      {/* Minimal usage: All advanced features turned off */}
+      
       <NetworkLoggerOverlay
+        networkLogger={networkLogger}
         draggable={false}
         enableDeviceShake={false}
         useCopyToClipboard={false}
-        showRequestHeader={false}
-        showResponseHeader={false}
-        networkLogger={networkLogger}
       />
     </View>
   );
 }
 ```
 
----
+### 2. With Draggable Button
 
-### Full Features Example
+Requires `react-native-gesture-handler` and `react-native-reanimated`.
 
-```typescript
-<NetworkLoggerOverlay
-  networkLogger={networkLogger}
-  draggable={true}                // Requires react-native-gesture-handler & react-native-reanimated
-  enableDeviceShake={true}        // Requires react-native-shake
-  useCopyToClipboard={true}       // Requires @react-native-clipboard/clipboard
-  showRequestHeader={true}
-  showResponseHeader={true}
-/>
-```
-
-> ⚠️ **Important:**  
-> If you enable `draggable`, `enableDeviceShake`, or `useCopyToClipboard` **without installing the corresponding peer dependency**, the debugger will throw a descriptive error at runtime, guiding you to install the required package.
-
----
-
-## 📚 API Reference
-
-### NetworkLoggerOverlay
-
-The main UI component that displays the network logs with a draggable floating button interface.
-
-#### Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `networkLogger` | `NetworkLogger` | **Required** | The network logger instance |
-| `enableDeviceShake` | `boolean` | `false` | Enable shake-to-show/hide functionality *(requires `react-native-shake`)* |
-| `draggable` | `boolean` | `false` | Enable draggable floating button *(requires `react-native-gesture-handler` and `react-native-reanimated`)* |
-| `useCopyToClipboard` | `boolean` | `false` | Enable copy to clipboard *(requires `@react-native-clipboard/clipboard`)* |
-| `showRequestHeader` | `boolean` | `false` | Display request headers in log details |
-| `showResponseHeader` | `boolean` | `false` | Display response headers in log details |
-
-#### Usage Examples
-
-```typescript
-// Minimal setup
-<NetworkLoggerOverlay networkLogger={networkLogger} />
-
-// With device shake support (if installed)
-<NetworkLoggerOverlay 
-  networkLogger={networkLogger}
-  enableDeviceShake={true}
-/>
-
-// Full-featured setup (requires peer dependencies)
-<NetworkLoggerOverlay 
-  networkLogger={networkLogger}
-  enableDeviceShake={true}
-  draggable={true}
-  useCopyToClipboard={true}
-  showRequestHeader={true}
-  showResponseHeader={true}
-/>
-```
-
-### NetworkLogger
-
-The core logger instance that handles request interception and storage.
-
-#### Methods
-
-| Method | Description |
-|--------|-------------|
-| `setupInterceptor()` | Initialize network request interception |
-| `clearLogs()` | Clear all stored network logs |
-| `getLogs()` | Get array of all stored network logs |
-
-## 🛠️ Usage Patterns
-
-### Development vs Production
-
-```typescript
+```tsx
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { networkLogger, NetworkLoggerOverlay } from 'react-native-api-debugger';
 
 export default function App() {
   useEffect(() => {
-    // Only enable in development
-    if (__DEV__) {
-      networkLogger.setupInterceptor();
-    }
+    networkLogger.setupInterceptor();
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Your app content */}
-      
-      {/* Only show in development */}
-      {__DEV__ && (
-        <NetworkLoggerOverlay 
-          networkLogger={networkLogger}
-          enableDeviceShake={true}
-          draggable={true}
-          useCopyToClipboard={true}
-        />
-      )}
-    </View>
-  );
-}
-```
-
----
-
-## 🎯 TypeScript Support
-
-The package includes comprehensive TypeScript definitions:
-
-```typescript
-import type { 
-  NetworkLog, 
-  NetworkResponse, 
-  NetworkRequestHeaders,
-  LogListener,
-  NetworkLoggerConfig
-} from 'react-native-api-debugger';
-
-// Example: Custom log processing
-const processNetworkLogs = (logs: NetworkLog[]) => {
-  const failedRequests = logs.filter(log => 
-    log.response && log.response.status >= 400
-  );
-  
-  console.log(`Found ${failedRequests.length} failed requests`);
-};
-```
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-#### TypeScript Errors
-```typescript
-// Ensure correct imports for types
-import type { NetworkLog } from 'react-native-api-debugger';
-```
-
-#### Gesture Handler Setup
-```typescript
-// Make sure to wrap your app with GestureHandlerRootView for draggable functionality
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-export default function App() {
-  return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/* Your app content */}
+      
+      <NetworkLoggerOverlay
+        networkLogger={networkLogger}
+        draggable={true}
+      />
     </GestureHandlerRootView>
   );
 }
 ```
 
-### Performance Considerations
+### 3. Full Featured Setup
 
-- **Memory Management**: The logger automatically limits stored requests to prevent memory issues (default: 100 requests)
-- **Production Builds**: Always disable in production to avoid performance impact
-- **Large Responses**: Consider filtering or truncating large response bodies
+```tsx
+<NetworkLoggerOverlay
+  networkLogger={networkLogger}
+  draggable={true}
+  enableDeviceShake={true}
+  useCopyToClipboard={true}
+  showRequestHeader={true}
+  showResponseHeader={true}
+  theme="light"
+  onThemeChange={(theme) => console.log('Theme:', theme)}
+/>
+```
 
+---
 
-### Production Safety
+## Advanced Usage
+
+### Configuration Options
+
+Configure the interceptor with custom settings:
+
+```tsx
+import { networkLogger } from 'react-native-api-debugger';
+
+useEffect(() => {
+  networkLogger.configure({
+    maxLogs: 50,                      // Maximum logs to store (default: 100)
+    ignoredUrls: ['/health', '/ping'], // URL patterns to ignore
+    ignoredDomains: ['analytics.example.com'],
+    ignoredMethods: ['OPTIONS'],       // HTTP methods to ignore
+    slowRequestThreshold: 2000,        // Mark requests slower than 2s
+  });
+  
+  networkLogger.setupInterceptor();
+}, []);
+```
+
+### NetworkLogger Methods
+
+```tsx
+import { networkLogger } from 'react-native-api-debugger';
+
+// Initialize interception
+networkLogger.setupInterceptor();
+
+// Get all logs
+const logs = networkLogger.getLogs();
+
+// Get log count
+const count = networkLogger.getLogCount();
+
+// Clear all logs
+networkLogger.clearLogs();
+
+// Delete a specific log
+networkLogger.deleteLog(logId);
+
+// Enable/disable logging
+networkLogger.enable();
+networkLogger.disable();
+
+// Check if enabled
+const isEnabled = networkLogger.isLoggerEnabled();
+
+// Update configuration
+networkLogger.configure({ maxLogs: 200 });
+
+// Get current configuration
+const config = networkLogger.getConfig();
+```
+
+### Subscribe to Log Changes
+
+```tsx
+useEffect(() => {
+  const unsubscribe = networkLogger.subscribe((logs) => {
+    console.log('Logs updated:', logs.length);
+  });
+  
+  return () => unsubscribe();
+}, []);
+```
+
+### Export Utilities
+
+```tsx
+import { exportToHAR, exportToPostman, exportLogs } from 'react-native-api-debugger';
+
+const logs = networkLogger.getLogs();
+
+// Export to HAR format (for browser DevTools)
+const harContent = exportToHAR(logs);
+
+// Export to Postman Collection
+const postmanContent = exportToPostman(logs, 'My API Collection');
+
+// Export to JSON
+const jsonContent = exportLogs(logs, 'json');
+```
+
+### Request Replay
+
+```tsx
+import { replayRequest, canReplayRequest, getReplayWarnings } from 'react-native-api-debugger';
+
+const log = networkLogger.getLogs()[0];
+
+// Check if request can be replayed
+if (canReplayRequest(log)) {
+  // Get warnings (e.g., "This request may modify data")
+  const warnings = getReplayWarnings(log);
+  
+  // Replay with optional modifications
+  const result = await replayRequest(log, {
+    modifyHeaders: { 'Authorization': 'Bearer new-token' },
+    timeout: 5000,
+  });
+  
+  if (result.success) {
+    console.log('Response:', result.response);
+  }
+}
+```
+
+### Sensitive Data Detection
+
+```tsx
+import { detectSensitiveData, redactNetworkLog } from 'react-native-api-debugger';
+
+const log = networkLogger.getLogs()[0];
+
+// Check for sensitive data
+const info = detectSensitiveData(log);
+if (info.hasSensitiveHeaders) {
+  console.log('Contains sensitive headers');
+}
+
+// Redact sensitive data before sharing
+const redactedLog = redactNetworkLog(log, { enabled: true });
+```
+
+### cURL Generation
+
+```tsx
+import { generateCurl } from 'react-native-api-debugger';
+
+const log = networkLogger.getLogs()[0];
+const curlCommand = generateCurl(log);
+// curl -X POST 'https://api.example.com/users' -H 'Content-Type: application/json' -d '{"name":"John"}'
+```
+
+---
+
+## API Reference
+
+### NetworkLoggerOverlay Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `networkLogger` | `NetworkLogger` | Required | The logger instance |
+| `enabled` | `boolean` | `__DEV__` | Enable/disable the overlay |
+| `draggable` | `boolean` | `false` | Enable draggable button |
+| `enableDeviceShake` | `boolean` | `false` | Show on device shake |
+| `useCopyToClipboard` | `boolean` | `false` | Enable clipboard copy |
+| `showRequestHeader` | `boolean` | `false` | Show request headers |
+| `showResponseHeader` | `boolean` | `false` | Show response headers |
+| `theme` | `'light' \| 'dark'` | `'light'` | Color theme |
+| `onThemeChange` | `(theme) => void` | - | Theme change callback |
+
+### NetworkLoggerConfig
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `maxLogs` | `number` | `100` | Maximum logs to store |
+| `ignoredUrls` | `string[]` | `[]` | URL patterns to ignore |
+| `ignoredDomains` | `string[]` | `[]` | Domains to ignore |
+| `ignoredMethods` | `string[]` | `[]` | HTTP methods to ignore |
+| `redactHeaders` | `string[]` | `['Authorization', ...]` | Headers to redact |
+| `enableRedaction` | `boolean` | `false` | Enable auto-redaction |
+| `slowRequestThreshold` | `number` | `3000` | Slow request threshold (ms) |
+
+### NetworkLog Type
 
 ```typescript
-// Environment-based configuration
-const isDev = __DEV__;
-const isStaging = process.env.NODE_ENV === 'staging';
+interface NetworkLog {
+  id: number;
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  body: string | null;
+  timestamp: string;
+  startTime: number;
+  response?: {
+    status: number;
+    statusText: string;
+    headers: Record<string, string>;
+    body: string;
+    duration: number;
+  };
+  error?: string;
+  duration?: number;
+  isSlow?: boolean;
+  bookmarked?: boolean;
+}
+```
 
-const showLogger = isDev || isStaging;
+---
+
+## Production Safety
+
+The overlay is disabled by default in production (`enabled` defaults to `__DEV__`). To explicitly control:
+
+```tsx
+<NetworkLoggerOverlay
+  networkLogger={networkLogger}
+  enabled={__DEV__}  // Only in development
+/>
+```
+
+For staging environments:
+
+```tsx
+const showDebugger = __DEV__ || process.env.STAGING === 'true';
+
+<NetworkLoggerOverlay
+  networkLogger={networkLogger}
+  enabled={showDebugger}
+/>
+```
+
+---
+
+## Troubleshooting
+
+### Draggable button not working
+
+Ensure your app is wrapped with `GestureHandlerRootView`:
+
+```tsx
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
-  useEffect(() => {
-    if (showLogger) {
-      networkLogger.setupInterceptor();
-    }
-  }, []);
-
   return (
-    <View style={{ flex: 1 }}>
-      {/* Your app content */}
-      {showLogger && (
-        <NetworkLoggerOverlay networkLogger={networkLogger} />
-      )}
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* App content */}
+    </GestureHandlerRootView>
   );
 }
 ```
 
-## 🤝 Contributing
+### Share sheet not appearing
 
-We welcome contributions! Here's how to get started:
+The share sheet requires the main modal to close first. This is handled automatically - ensure you're using the latest version.
 
-1. **Fork the repository**
-2. **Clone your fork**: `git clone https://github.com/cmcWebCode40/react-native-api-debugger.git`
-3. **Install dependencies**: `npm install`
-4. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-5. **Make your changes** and add tests
-6. **Run tests**: `npm test`
-7. **Commit changes**: `git commit -m 'Add amazing feature'`
-8. **Push to branch**: `git push origin feature/amazing-feature`
-9. **Open a Pull Request**
+### Requests not being captured
 
-### Development Setup
+Make sure `setupInterceptor()` is called before any network requests:
 
-```bash
-# Clone the repository
-git clone https://github.com/cmcWebCode40/react-native-api-debugger.git
-
-# Install dependencies
-cd react-native-api-debugger
-npm install
-
-# Run tests
-npm test
-
-# Start the example app
-cd example
-npm install
-npx react-native run-ios # or run-android
+```tsx
+useEffect(() => {
+  networkLogger.setupInterceptor();
+}, []); // Empty dependency array - runs once on mount
 ```
-
-## 📄 License
-
-MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support & Community
-
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/cmcWebCode40/react-native-api-debugger/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/cmcWebCode40/react-native-api-debugger/discussions)
-- 📖 **Documentation**: [Wiki](https://github.com/cmcWebCode40/react-native-api-debugger/wiki)
-- 💬 **Community**: [Discord Server](https://discord.gg/your-discord)
-- 🐦 **Updates**: [@YourTwitter](https://twitter.com/your-twitter)
-
-## 📊 Stats & Recognition
-
-<div align="center">
-
-**Made with ❤️ for the React Native community**
-
-</div>
 
 ---
 
-*Built with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)*
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make changes and run tests: `yarn test`
+4. Commit: `git commit -m 'Add my feature'`
+5. Push: `git push origin feature/my-feature`
+6. Open a Pull Request
+
+### Development
+
+```bash
+git clone https://github.com/cmcWebCode40/react-native-api-debugger.git
+cd react-native-api-debugger
+yarn install
+
+# Run example app
+cd example
+yarn install
+yarn ios  # or yarn android
+```
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Support
+
+- Bug Reports: [GitHub Issues](https://github.com/cmcWebCode40/react-native-api-debugger/issues)
+- Feature Requests: [GitHub Discussions](https://github.com/cmcWebCode40/react-native-api-debugger/discussions)
