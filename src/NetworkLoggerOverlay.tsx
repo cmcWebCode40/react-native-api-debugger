@@ -260,7 +260,10 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
               </TouchableOpacity>
               <TouchableOpacity
                 style={staticStyles.exportButton}
-                onPress={() => setExportModalVisible(true)}
+                onPress={() => {
+                  setVisible(false);
+                  setExportModalVisible(true);
+                }}
                 activeOpacity={0.8}
               >
                 <Text style={staticStyles.themeButtonText}>📤</Text>
