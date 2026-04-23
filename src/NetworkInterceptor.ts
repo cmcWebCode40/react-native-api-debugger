@@ -1,4 +1,11 @@
-import type { LogListener, NetworkLog, NetworkRequestHeaders } from './types';
+import type {
+  LogListener,
+  NetworkLog,
+  NetworkLoggerConfig,
+  NetworkRequestHeaders,
+} from './types';
+import { DEFAULT_CONFIG } from './constants/config';
+import { shouldIgnoreUrl, shouldIgnoreDomain } from './utils/filters';
 
 interface CustomXMLHttpRequest extends XMLHttpRequest {
   open: (method: string, url: string) => void;
@@ -10,17 +17,49 @@ class NetworkLogger {
   private logs: NetworkLog[] = [];
   private listeners: LogListener[] = [];
   private isEnabled: boolean = true;
+  private config: NetworkLoggerConfig = { ...DEFAULT_CONFIG };
 
-  constructor() {
+  constructor(config?: Partial<NetworkLoggerConfig>) {
     this.logs = [];
     this.listeners = [];
     this.isEnabled = true;
+    if (config) {
+      this.config = { ...DEFAULT_CONFIG, ...config };
+    }
+  }
+
+  public configure(config: Partial<NetworkLoggerConfig>): void {
+    this.config = { ...this.config, ...config };
+  }
+
+  public getConfig(): NetworkLoggerConfig {
+    return { ...this.config };
+  }
+
+  private shouldIgnoreRequest(url: string, method: string): boolean {
+    if (shouldIgnoreUrl(url, this.config.ignoredUrls)) {
+      return true;
+    }
+    if (shouldIgnoreDomain(url, this.config.ignoredDomains)) {
+      return true;
+    }
+    if (
+      this.config.ignoredMethods.length > 0 &&
+      this.config.ignoredMethods
+        .map((m) => m.toUpperCase())
+        .includes(method.toUpperCase())
+    ) {
+      return true;
+    }
+    return false;
   }
 
   public setupInterceptor(): void {
     if (!this.isEnabled) return;
 
     const originalFetch = global.fetch;
+    // eslint-disable-next-line consistent-this
+    const self = this;
 
     global.fetch = async (
       input: RequestInfo | URL,
@@ -30,13 +69,18 @@ class NetworkLogger {
       const requestId: number = Date.now() + Math.random();
       const url: string = input.toString();
       const options: RequestInit = init || {};
+      const method = options.method || 'GET';
+
+      if (self.shouldIgnoreRequest(url, method)) {
+        return originalFetch(input, init);
+      }
 
       const requestLog: NetworkLog = {
         id: requestId,
-        method: options.method || 'GET',
+        method,
         url,
-        headers: this.processRequestHeaders(options.headers),
-        body: options.body ? this.stringifyBody(options.body) : null,
+        headers: self.processRequestHeaders(options.headers),
+        body: options.body ? self.stringifyBody(options.body) : null,
         timestamp: new Date().toISOString(),
         startTime,
       };
@@ -52,22 +96,24 @@ class NetworkLogger {
           responseBody = 'Unable to read response body';
         }
 
+        const duration = Date.now() - startTime;
         requestLog.response = {
           status: response.status,
           statusText: response.statusText,
-          headers: this.headersToObject(response.headers),
+          headers: self.headersToObject(response.headers),
           body: responseBody,
-          duration: Date.now() - startTime,
+          duration,
         };
+        requestLog.isSlow = duration > self.config.slowRequestThreshold;
 
-        this.addLog(requestLog);
+        self.addLog(requestLog);
         return response;
       } catch (error) {
         const errorMessage: string =
           error instanceof Error ? error.message : 'Unknown error';
         requestLog.error = errorMessage;
         requestLog.duration = Date.now() - startTime;
-        this.addLog(requestLog);
+        self.addLog(requestLog);
         throw error;
       }
     };
@@ -83,6 +129,7 @@ class NetworkLogger {
     global.XMLHttpRequest = function (): CustomXMLHttpRequest {
       const xhr = new originalXHR() as CustomXMLHttpRequest;
       const requestId: number = Date.now() + Math.random();
+      let shouldIgnore = false;
       let requestLog: NetworkLog = {
         id: requestId,
         method: '',
@@ -100,22 +147,29 @@ class NetworkLogger {
       xhr.open = function (method: string, url: string): void {
         requestLog.method = method;
         requestLog.url = url;
+        shouldIgnore = self.shouldIgnoreRequest(url, method);
         return originalOpen.call(this, method, url);
       };
 
       xhr.setRequestHeader = function (header: string, value: string): void {
-        requestLog.headers[header] = value;
+        if (!shouldIgnore) {
+          requestLog.headers[header] = value;
+        }
         return originalSetRequestHeader.call(this, header, value);
       };
 
       xhr.send = function (body?: Document | any | null): void {
+        if (shouldIgnore) {
+          return originalSend.call(this, body);
+        }
+
         requestLog.body = body ? self.stringifyBody(body) : null;
         requestLog.startTime = Date.now();
 
         const originalOnReadyStateChange = xhr.onreadystatechange;
 
         xhr.onreadystatechange = function (): void {
-          if (xhr.readyState === 4) {
+          if (xhr.readyState === 4 && !shouldIgnore) {
             let responseBody: string = '';
 
             try {
@@ -146,13 +200,15 @@ class NetworkLogger {
             } catch (error) {
               responseBody = `[Error reading response: ${error instanceof Error ? error.message : 'Unknown error'}]`;
             }
+            const duration = Date.now() - requestLog.startTime;
             requestLog.response = {
               status: xhr.status,
               statusText: xhr.statusText,
               headers: self.parseXHRHeaders(xhr.getAllResponseHeaders()),
               body: responseBody,
-              duration: Date.now() - requestLog.startTime,
+              duration,
             };
+            requestLog.isSlow = duration > self.config.slowRequestThreshold;
             self.addLog(requestLog);
           }
 
@@ -237,8 +293,8 @@ class NetworkLogger {
   private addLog(log: NetworkLog): void {
     this.logs.unshift(log);
 
-    if (this.logs.length > 100) {
-      this.logs = this.logs.slice(0, 100);
+    if (this.logs.length > this.config.maxLogs) {
+      this.logs = this.logs.slice(0, this.config.maxLogs);
     }
 
     this.listeners.forEach((listener: LogListener) => listener([...this.logs]));
