@@ -21,9 +21,21 @@ export interface NetworkLog {
   response?: NetworkResponse;
   error?: string;
   duration?: number;
+  isSlow?: boolean;
+  bookmarked?: boolean;
 }
 
 export type LogListener = (logs: NetworkLog[]) => void;
+
+export interface NetworkLoggerConfig {
+  maxLogs: number;
+  ignoredUrls: string[];
+  ignoredDomains: string[];
+  ignoredMethods: string[];
+  redactHeaders: string[];
+  enableRedaction: boolean;
+  slowRequestThreshold: number;
+}
 
 export interface NetworkLogger {
   subscribe: (listener: LogListener) => () => void;
@@ -33,4 +45,6 @@ export interface NetworkLogger {
   getLogs?: () => NetworkLog[];
   getLogCount?: () => number;
   isLoggerEnabled?: () => boolean;
+  configure?: (config: Partial<NetworkLoggerConfig>) => void;
+  getConfig?: () => NetworkLoggerConfig;
 }
