@@ -208,6 +208,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
       showRequestHeader={showRequestHeader}
       theme={theme}
       onDelete={handleDeleteLog}
+      onCloseModal={handleModalClose}
     />
   );
 

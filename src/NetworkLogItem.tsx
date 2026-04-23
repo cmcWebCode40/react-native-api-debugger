@@ -33,6 +33,7 @@ interface NetworkLogItemProps {
   useCopyToClipboard?: boolean;
   theme?: ThemeMode;
   onDelete?: (logId: number) => void;
+  onCloseModal?: () => void;
 }
 
 const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
@@ -42,6 +43,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
   showRequestHeader = false,
   theme = 'light',
   onDelete,
+  onCloseModal,
 }) => {
   const [expanded, setExpanded] = useState<boolean>(false);
   const [isReplaying, setIsReplaying] = useState<boolean>(false);
@@ -104,14 +106,17 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
   const handleShare = useCallback(async () => {
     try {
       const content = exportSingleRequestAsJSON(log);
-      await Share.share({
-        message: content,
-        title: `${log.method} ${log.url}`,
-      });
+      onCloseModal?.();
+      setTimeout(async () => {
+        await Share.share({
+          message: content,
+          title: `${log.method} ${log.url}`,
+        });
+      }, 300);
     } catch (error) {
       // User cancelled or error
     }
-  }, [log]);
+  }, [log, onCloseModal]);
 
   const handleDelete = useCallback(() => {
     onDelete?.(log.id);
@@ -413,12 +418,14 @@ const staticStyles = {
     gap: 8,
   } as ViewStyle,
   deleteButton: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     borderRadius: 12,
     backgroundColor: colors.error,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#f6f6f6',
   } as ViewStyle,
   deleteButtonText: {
     color: '#fff',
