@@ -40,6 +40,7 @@ export interface NetworkLoggerConfig {
 export interface NetworkLogger {
   subscribe: (listener: LogListener) => () => void;
   clearLogs: () => void;
+  deleteLog: (logId: number) => void;
   enable: () => void;
   disable: () => void;
   getLogs?: () => NetworkLog[];

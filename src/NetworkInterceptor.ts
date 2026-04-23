@@ -314,6 +314,11 @@ class NetworkLogger {
     this.listeners.forEach((listener: LogListener) => listener([]));
   }
 
+  public deleteLog(logId: number): void {
+    this.logs = this.logs.filter((log) => log.id !== logId);
+    this.listeners.forEach((listener: LogListener) => listener([...this.logs]));
+  }
+
   public enable(): void {
     this.isEnabled = true;
   }

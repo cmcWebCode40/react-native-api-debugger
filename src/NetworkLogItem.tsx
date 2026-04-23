@@ -32,6 +32,7 @@ interface NetworkLogItemProps {
   showResponseHeader?: boolean;
   useCopyToClipboard?: boolean;
   theme?: ThemeMode;
+  onDelete?: (logId: number) => void;
 }
 
 const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
@@ -40,6 +41,7 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
   showResponseHeader = false,
   showRequestHeader = false,
   theme = 'light',
+  onDelete,
 }) => {
   const [expanded, setExpanded] = useState<boolean>(false);
   const [isReplaying, setIsReplaying] = useState<boolean>(false);
@@ -110,6 +112,10 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
       // User cancelled or error
     }
   }, [log]);
+
+  const handleDelete = useCallback(() => {
+    onDelete?.(log.id);
+  }, [log.id, onDelete]);
 
   const formatHeaders = (headers?: NetworkRequestHeaders): string => {
     if (!headers || typeof headers !== 'object') return 'No headers';
@@ -185,7 +191,19 @@ const NetworkLogItem: React.FC<NetworkLogItemProps> = ({
             )}
           </View>
         </View>
-        <Icon type={expanded ? 'chevronDown' : 'chevronUp'} />
+        <View style={staticStyles.headerActions}>
+          {onDelete && (
+            <TouchableOpacity
+              style={staticStyles.deleteButton}
+              onPress={handleDelete}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={staticStyles.deleteButtonText}>✕</Text>
+            </TouchableOpacity>
+          )}
+          <Icon type={expanded ? 'chevronDown' : 'chevronUp'} />
+        </View>
       </TouchableOpacity>
 
       {expanded && (
@@ -388,6 +406,24 @@ const staticStyles = {
   method: {
     fontSize: 14,
     fontWeight: '600',
+  } as TextStyle,
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  } as ViewStyle,
+  deleteButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.error,
+    justifyContent: 'center',
+    alignItems: 'center',
+  } as ViewStyle,
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   } as TextStyle,
   statusContainer: {
     flexDirection: 'row',

@@ -65,24 +65,26 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   showRequestHeader,
   showResponseHeader,
   useCopyToClipboard,
-  theme: themeProp = 'light',
+  theme: themeProp,
   onThemeChange,
 }) => {
   const [visible, setVisible] = useState<boolean>(false);
   const [logs, setLogs] = useState<NetworkLog[]>([]);
   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
   const [showButton, setShowButton] = useState<boolean>(!enableDeviceShake);
-  const [internalTheme, setInternalTheme] = useState<ThemeMode>(themeProp);
+  const [internalTheme, setInternalTheme] = useState<ThemeMode>(
+    themeProp ?? 'light'
+  );
   const [exportModalVisible, setExportModalVisible] = useState<boolean>(false);
 
   const theme = themeProp ?? internalTheme;
   const themeColors = useMemo(() => getThemeColors(theme), [theme]);
 
   const toggleTheme = useCallback(() => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme = internalTheme === 'light' ? 'dark' : 'light';
     setInternalTheme(newTheme);
     onThemeChange?.(newTheme);
-  }, [theme, onThemeChange]);
+  }, [internalTheme, onThemeChange]);
 
   const themedStyles = useMemo(
     () => createThemedStyles(themeColors),
@@ -165,6 +167,13 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
     );
   }, [networkLogger]);
 
+  const handleDeleteLog = useCallback(
+    (logId: number): void => {
+      networkLogger.deleteLog(logId);
+    },
+    [networkLogger]
+  );
+
   const handleModalOpen = useCallback((): void => {
     setVisible(true);
   }, []);
@@ -198,6 +207,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
       showResponseHeader={showResponseHeader}
       showRequestHeader={showRequestHeader}
       theme={theme}
+      onDelete={handleDeleteLog}
     />
   );
 
