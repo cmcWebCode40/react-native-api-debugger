@@ -42,6 +42,7 @@ Install only what you need:
 | `react-native-reanimated` | Smooth drag animations |
 | `react-native-shake` | Device shake detection |
 | `@react-native-clipboard/clipboard` | Copy to clipboard |
+| `react-native-svg` | SVG icons (falls back to text icons) |
 
 ```bash
 # For draggable button
@@ -52,6 +53,9 @@ npm install react-native-shake
 
 # For clipboard
 npm install @react-native-clipboard/clipboard
+
+# For SVG icons (optional - text fallback available)
+npm install react-native-svg
 ```
 
 > For Expo SDK ≤ 53, use `react-native-reanimated` version 3.x.x
@@ -281,7 +285,7 @@ const curlCommand = generateCurl(log);
 | `useCopyToClipboard` | `boolean` | `false` | Enable clipboard copy |
 | `showRequestHeader` | `boolean` | `false` | Show request headers |
 | `showResponseHeader` | `boolean` | `false` | Show response headers |
-| `theme` | `'light' \| 'dark'` | `'light'` | Color theme |
+| `theme` | `'light' \| 'dark'` | `'dark'` | Color theme |
 | `onThemeChange` | `(theme) => void` | - | Theme change callback |
 
 ### NetworkLoggerConfig
