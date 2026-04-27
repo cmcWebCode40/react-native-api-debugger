@@ -28,8 +28,10 @@ A network request debugging tool for React Native applications. Monitor, inspect
 
 ```bash
 npm install react-native-api-debugger
+
 # or
 yarn add react-native-api-debugger
+
 ```
 
 ### Optional Peer Dependencies
@@ -38,11 +40,12 @@ Install only what you need:
 
 | Package | Required For |
 |---------|--------------|
+| `react-native-svg` (Recommended) | SVG icons (falls back to text icons) |
 | `react-native-gesture-handler` | Draggable floating button |
 | `react-native-reanimated` | Smooth drag animations |
 | `react-native-shake` | Device shake detection |
 | `@react-native-clipboard/clipboard` | Copy to clipboard |
-| `react-native-svg` | SVG icons (falls back to text icons) |
+
 
 ```bash
 # For draggable button
