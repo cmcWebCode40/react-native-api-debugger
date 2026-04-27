@@ -3,7 +3,8 @@ import {
   Alert,
   FlatList,
   Modal,
-  SafeAreaView,
+  Platform,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -18,10 +19,16 @@ import type { NetworkLog, NetworkLogger } from './types';
 import type { StatusFilterKey } from './utils/filters';
 import FloatingButton from './FloatingButton';
 import NonFloatingButton from './NonFloatingButton';
-import { colors, getThemeColors, type ThemeMode } from './constants/colors';
+import {
+  colors,
+  getThemeColors,
+  type ThemeMode,
+  type ThemeColors,
+} from './constants/colors';
 import { filterLogs, getLogStats, defaultFilterState } from './utils/filters';
 import type { FilterState } from './utils/filters';
 import { ExportModal } from './components/ExportModal';
+import { SvgIcon } from './SvgIcon';
 
 let RNShake: any = null;
 
@@ -33,11 +40,6 @@ try {
 
 interface NetworkLoggerOverlayProps {
   networkLogger: NetworkLogger;
-  /**
-   * Controls whether the overlay is enabled. Defaults to __DEV__ (development mode only).
-   * Set to true to force enable in production (not recommended).
-   * Set to false to disable even in development.
-   */
   enabled?: boolean;
   enableDeviceShake?: boolean;
   showRequestHeader?: boolean;
@@ -54,7 +56,6 @@ const STATUS_FILTERS: { key: StatusFilterKey; label: string }[] = [
   { key: 'redirect', label: '3xx' },
   { key: 'clientError', label: '4xx' },
   { key: 'serverError', label: '5xx' },
-  { key: 'error', label: 'Errors' },
 ];
 
 export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
@@ -73,7 +74,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
   const [showButton, setShowButton] = useState<boolean>(!enableDeviceShake);
   const [internalTheme, setInternalTheme] = useState<ThemeMode>(
-    themeProp ?? 'light'
+    themeProp ?? 'dark'
   );
   const [exportModalVisible, setExportModalVisible] = useState<boolean>(false);
 
@@ -151,8 +152,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
     return (
       filters.searchTerm !== '' ||
       filters.statusFilter !== 'all' ||
-      filters.methodFilter !== null ||
-      filters.apiOnly
+      filters.methodFilter !== null
     );
   }, [filters]);
 
@@ -189,10 +189,6 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
     [updateFilter]
   );
 
-  const toggleApiFilter = useCallback((): void => {
-    updateFilter('apiOnly', !filters.apiOnly);
-  }, [filters.apiOnly, updateFilter]);
-
   const handleStatusFilterChange = useCallback(
     (key: StatusFilterKey): void => {
       updateFilter('statusFilter', key);
@@ -200,7 +196,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
     [updateFilter]
   );
 
-  const renderLogItem: ListRenderItem<NetworkLog> = ({ item }) => (
+  const renderLogItem: ListRenderItem<NetworkLog> = ({ item, index }) => (
     <NetworkLogItem
       log={item}
       useCopyToClipboard={useCopyToClipboard}
@@ -209,11 +205,25 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
       theme={theme}
       onDelete={handleDeleteLog}
       onCloseModal={handleModalClose}
+      isAlternate={index % 2 === 1}
     />
   );
 
   const renderEmptyList = (): React.ReactElement => (
-    <Text style={themedStyles.emptyText}>No network requests logged yet</Text>
+    <View style={themedStyles.emptyContainer}>
+      <View style={themedStyles.emptyIconContainer}>
+        <SvgIcon name="cloudOff" size={40} color={themeColors.border} />
+      </View>
+      <Text style={themedStyles.emptyTitle}>Listening for traffic...</Text>
+      <Text style={themedStyles.emptyText}>
+        No network requests logged yet. Trigger an API call in your app to see
+        it here.
+      </Text>
+      <View style={themedStyles.statusPill}>
+        <View style={staticStyles.statusDot} />
+        <Text style={themedStyles.statusPillText}>Interceptor Active</Text>
+      </View>
+    </View>
   );
 
   const keyExtractor = (item: NetworkLog): string => item.id.toString();
@@ -225,6 +235,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
     openModal: handleModalOpen,
     logsLength: logs.length,
     errorCount: logStats.errors,
+    theme,
   };
 
   if (!enabled) {
@@ -245,125 +256,135 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
         presentationStyle="fullScreen"
         onRequestClose={handleModalClose}
       >
-        <SafeAreaView style={themedStyles.modalContainer}>
+        <View style={themedStyles.modalContainer}>
+          <StatusBar
+            barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+            backgroundColor={themeColors.surfaceContainer}
+          />
+          {/* Header */}
           <View style={themedStyles.header}>
-            <Text style={themedStyles.title}>Network Logs</Text>
-            <View style={staticStyles.headerButtons}>
+            <View style={staticStyles.headerLeft}>
+              <SvgIcon
+                name="terminal"
+                size={20}
+                color={themeColors.primaryContainer}
+              />
+              <Text style={themedStyles.title}>NETWORK LOGS</Text>
+            </View>
+            <View style={staticStyles.headerRight}>
               <TouchableOpacity
-                style={staticStyles.themeButton}
+                style={staticStyles.iconButton}
                 onPress={toggleTheme}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
-                <Text style={staticStyles.themeButtonText}>
-                  {theme === 'light' ? '🌙' : '☀️'}
-                </Text>
+                <SvgIcon
+                  name={theme === 'dark' ? 'sun' : 'moon'}
+                  size={20}
+                  color={themeColors.textMuted}
+                />
               </TouchableOpacity>
               <TouchableOpacity
-                style={staticStyles.exportButton}
+                style={staticStyles.iconButton}
                 onPress={() => {
                   setVisible(false);
                   setExportModalVisible(true);
                 }}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
-                <Text style={staticStyles.themeButtonText}>📤</Text>
+                <SvgIcon
+                  name="download"
+                  size={20}
+                  color={themeColors.textMuted}
+                />
               </TouchableOpacity>
               <TouchableOpacity
-                style={themedStyles.clearButton}
+                style={[staticStyles.iconButton]}
                 onPress={handleClearLogs}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
-                <Text style={staticStyles.buttonText}>Clear</Text>
+                <SvgIcon name="trash" size={20} color={themeColors.danger} />
               </TouchableOpacity>
               <TouchableOpacity
-                style={themedStyles.closeButton}
+                style={staticStyles.iconButton}
                 onPress={handleModalClose}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
-                <Text style={staticStyles.buttonText}>Close</Text>
+                <SvgIcon name="x" size={20} color={themeColors.textMuted} />
               </TouchableOpacity>
             </View>
           </View>
 
+          {/* Search & Filters */}
           <View style={themedStyles.searchContainer}>
-            <TextInput
-              style={themedStyles.searchInput}
-              placeholder="Search by URL, method, or body..."
-              value={filters.searchTerm}
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholderTextColor={themeColors.textMuted}
-              clearButtonMode="while-editing"
-              onChangeText={handleSearchChange}
-            />
-            <View style={staticStyles.statsContainer}>
-              <Text style={themedStyles.statsText}>
-                {filteredLogs.length}/{logs.length} requests
-                {logStats.errors > 0 && (
-                  <Text style={staticStyles.errorStats}>
-                    {' '}
-                    ({logStats.errors} errors)
-                  </Text>
-                )}
-              </Text>
+            <View style={themedStyles.searchInputContainer}>
+              <SvgIcon name="search" size={18} color={themeColors.textMuted} />
+              <TextInput
+                style={themedStyles.searchInput}
+                placeholder="Filter by URL, method, status..."
+                value={filters.searchTerm}
+                autoCapitalize="none"
+                autoCorrect={false}
+                placeholderTextColor={themeColors.textMuted}
+                onChangeText={handleSearchChange}
+              />
+            </View>
+            <View style={staticStyles.filterRow}>
+              <View style={staticStyles.filterChips}>
+                {STATUS_FILTERS.map((filter) => (
+                  <TouchableOpacity
+                    key={filter.key}
+                    style={[
+                      themedStyles.filterChip,
+                      filters.statusFilter === filter.key &&
+                        themedStyles.filterChipActive,
+                    ]}
+                    onPress={() => handleStatusFilterChange(filter.key)}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[
+                        themedStyles.filterChipText,
+                        filters.statusFilter === filter.key &&
+                          staticStyles.filterChipTextActive,
+                      ]}
+                    >
+                      {filter.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
               {hasActiveFilters && (
                 <TouchableOpacity onPress={clearFilters} activeOpacity={0.7}>
-                  <Text style={themedStyles.clearFiltersText}>
-                    Clear filters
-                  </Text>
+                  <Text style={themedStyles.clearFiltersText}>Clear</Text>
                 </TouchableOpacity>
               )}
             </View>
-            <View style={staticStyles.filterContainer}>
-              {STATUS_FILTERS.map((filter) => (
-                <TouchableOpacity
-                  key={filter.key}
-                  style={[
-                    themedStyles.filterTag,
-                    filters.statusFilter === filter.key &&
-                      themedStyles.filterTagActive,
-                    filter.key === 'error' &&
-                      filters.statusFilter === filter.key &&
-                      staticStyles.filterTagError,
-                  ]}
-                  onPress={() => handleStatusFilterChange(filter.key)}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={[
-                      themedStyles.filterTagText,
-                      filters.statusFilter === filter.key &&
-                        staticStyles.filterTagTextActive,
-                    ]}
-                  >
-                    {filter.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-              <TouchableOpacity
-                style={[
-                  themedStyles.filterTag,
-                  filters.apiOnly && themedStyles.filterTagActive,
-                ]}
-                onPress={toggleApiFilter}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[
-                    themedStyles.filterTagText,
-                    filters.apiOnly && staticStyles.filterTagTextActive,
-                  ]}
-                >
-                  API
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
+
+          {/* Stats Bar */}
+          {logs.length > 0 && (
+            <View style={themedStyles.statsBar}>
+              <Text style={themedStyles.statsText}>
+                {filteredLogs.length} of {logs.length} requests
+              </Text>
+              {logStats.errors > 0 && (
+                <Text style={staticStyles.errorStats}>
+                  {logStats.errors} errors
+                </Text>
+              )}
+            </View>
+          )}
+
+          {/* Log List */}
           <FlatList
             data={filteredLogs}
             keyExtractor={keyExtractor}
             renderItem={renderLogItem}
-            contentContainerStyle={staticStyles.listContainer}
+            contentContainerStyle={
+              logs.length === 0
+                ? staticStyles.emptyListContainer
+                : staticStyles.listContainer
+            }
             ListEmptyComponent={renderEmptyList}
             showsVerticalScrollIndicator={true}
             removeClippedSubviews={true}
@@ -371,7 +392,7 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
             windowSize={10}
             initialNumToRender={10}
           />
-        </SafeAreaView>
+        </View>
       </Modal>
       <ExportModal
         visible={exportModalVisible}
@@ -383,149 +404,181 @@ export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   );
 };
 
-interface ThemeColors {
-  background: string;
-  surface: string;
-  border: string;
-  text: string;
-  textSecondary: string;
-  textMuted: string;
-  primary: string;
-  danger: string;
-}
-
 const createThemedStyles = (themeColors: ThemeColors) => ({
   modalContainer: {
     flex: 1,
     backgroundColor: themeColors.background,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 44,
   } as ViewStyle,
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: themeColors.surface,
-    elevation: 2,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: themeColors.surfaceContainer,
+    borderBottomWidth: 1,
+    borderBottomColor: themeColors.border,
   } as ViewStyle,
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '800',
     color: themeColors.text,
+    letterSpacing: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   } as TextStyle,
-  clearButton: {
-    backgroundColor: themeColors.danger,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    marginRight: 8,
-  } as ViewStyle,
-  closeButton: {
-    backgroundColor: themeColors.primary,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-  } as ViewStyle,
   searchContainer: {
-    paddingTop: 16,
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-    backgroundColor: themeColors.surface,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: themeColors.surfaceContainer,
+    borderBottomWidth: 1,
+    borderBottomColor: themeColors.border,
+    gap: 10,
   } as ViewStyle,
-  searchInput: {
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: themeColors.surfaceContainerLow,
     borderWidth: 1,
     borderColor: themeColors.border,
-    borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 16,
-    color: themeColors.text,
-    backgroundColor: themeColors.background,
-  } as TextStyle,
-  statsText: {
+    gap: 8,
+  } as ViewStyle,
+  searchInput: {
+    flex: 1,
+    paddingVertical: 10,
     fontSize: 12,
-    color: themeColors.textSecondary,
+    color: themeColors.text,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  } as TextStyle,
+  filterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: themeColors.border,
+    backgroundColor: 'transparent',
+  } as ViewStyle,
+  filterChipActive: {
+    backgroundColor: themeColors.primaryContainer,
+    borderColor: themeColors.primaryContainer,
+  } as ViewStyle,
+  filterChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: themeColors.textMuted,
+    letterSpacing: 0.5,
   } as TextStyle,
   clearFiltersText: {
-    fontSize: 12,
+    fontSize: 11,
     color: themeColors.primary,
     fontWeight: '600',
   } as TextStyle,
-  filterTag: {
-    backgroundColor: themeColors.background,
+  statsBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
+    paddingVertical: 8,
+    backgroundColor: themeColors.surfaceContainerLow,
+    borderBottomWidth: 1,
+    borderBottomColor: themeColors.borderSubtle,
+  } as ViewStyle,
+  statsText: {
+    fontSize: 11,
+    color: themeColors.textMuted,
+    fontWeight: '500',
+  } as TextStyle,
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  } as ViewStyle,
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderWidth: 2,
+    borderStyle: 'dashed',
     borderColor: themeColors.border,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+    backgroundColor: themeColors.surfaceContainerLow,
   } as ViewStyle,
-  filterTagActive: {
-    backgroundColor: themeColors.primary,
-    borderColor: themeColors.primary,
-  } as ViewStyle,
-  filterTagText: {
-    fontSize: 12,
+  emptyTitle: {
+    fontSize: 18,
     fontWeight: '600',
-    color: themeColors.textSecondary,
+    color: themeColors.text,
+    marginBottom: 8,
   } as TextStyle,
   emptyText: {
     textAlign: 'center',
+    color: themeColors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 24,
+  } as TextStyle,
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: themeColors.surfaceContainer,
+    borderWidth: 1,
+    borderColor: themeColors.border,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+  } as ViewStyle,
+  statusPillText: {
+    fontSize: 12,
     color: themeColors.textSecondary,
-    fontSize: 16,
-    marginTop: '50%',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   } as TextStyle,
 });
 
 const staticStyles = {
-  headerButtons: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
   } as ViewStyle,
-  themeButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 16,
-    marginRight: 4,
-  } as ViewStyle,
-  exportButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 16,
-    marginRight: 8,
-  } as ViewStyle,
-  themeButtonText: {
-    fontSize: 18,
-  } as TextStyle,
-  buttonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-  } as TextStyle,
-  statsContainer: {
+  headerRight: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  } as ViewStyle,
+  iconButton: {
+    padding: 8,
+  } as ViewStyle,
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 4,
   } as ViewStyle,
+  filterChips: {
+    flexDirection: 'row',
+    gap: 6,
+  } as ViewStyle,
+  filterChipTextActive: {
+    color: '#FFFFFF',
+  } as TextStyle,
   errorStats: {
+    fontSize: 11,
     color: colors.error,
     fontWeight: '600',
   } as TextStyle,
-  filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 8,
-  } as ViewStyle,
-  filterTagError: {
-    backgroundColor: colors.error,
-    borderColor: colors.error,
-  } as ViewStyle,
-  filterTagTextActive: {
-    color: '#fff',
-  } as TextStyle,
   listContainer: {
-    padding: 16,
+    paddingBottom: 34,
+  } as ViewStyle,
+  emptyListContainer: {
+    flexGrow: 1,
+  } as ViewStyle,
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.success,
   } as ViewStyle,
 };
+
 export type { NetworkLoggerOverlayProps, NetworkLogger };

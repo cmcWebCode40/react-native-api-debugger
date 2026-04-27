@@ -1,21 +1,26 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Alert,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import Icon from './Icon';
+import { SvgIcon } from './SvgIcon';
+import { colors } from './constants/colors';
 
 let Clipboard: any = null;
 try {
   Clipboard = require('@react-native-clipboard/clipboard').default;
-} catch (error) {
+} catch {
   Clipboard = null;
 }
 
 interface CopyItemProps {
   textToCopy: string;
+  size?: number;
   checkDuration?: number;
   style?: StyleProp<ViewStyle>;
   useCopyToClipboard?: boolean;
@@ -25,6 +30,7 @@ export const CopyItem: React.FC<CopyItemProps> = ({
   textToCopy,
   checkDuration = 2000,
   style,
+  size = 16,
   useCopyToClipboard,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -32,8 +38,8 @@ export const CopyItem: React.FC<CopyItemProps> = ({
 
   useEffect(() => {
     if (useCopyToClipboard && !Clipboard) {
-      throw new Error(
-        'Copy to clipboard functionality is required (useCopyToClipboard=true) but @react-native-clipboard/clipboard module is not installed. Please install it with: npm install @react-native-clipboard/clipboard'
+      console.warn(
+        '[NetworkLogger] Copy to clipboard enabled but @react-native-clipboard/clipboard is not installed. Install it with: npm install @react-native-clipboard/clipboard'
       );
     }
   }, [useCopyToClipboard]);
@@ -57,23 +63,49 @@ export const CopyItem: React.FC<CopyItemProps> = ({
   }, [textToCopy, checkDuration, useCopyToClipboard]);
 
   if (!useCopyToClipboard) {
-    return null;
+    return (
+      <View style={[style, styles.disabledContainer]}>
+        <Text style={styles.disabledText}>Copy not enabled</Text>
+      </View>
+    );
   }
 
   if (!Clipboard) {
-    return null;
+    return (
+      <View style={[style, styles.disabledContainer]}>
+        <Text style={styles.disabledText}>Clipboard unavailable</Text>
+      </View>
+    );
   }
 
   return (
     <TouchableOpacity
-      style={style}
+      style={[styles.button, style]}
       onPress={handleCopy}
-      activeOpacity={0.5}
+      activeOpacity={0.7}
       accessibilityRole="button"
       accessibilityLabel={copied ? 'Copied to clipboard' : 'Copy to clipboard'}
       disabled={!useCopyToClipboard}
     >
-      {copied ? <Icon type="done" /> : <Icon type="copy" />}
+      {copied ? (
+        <SvgIcon name="check" size={size} color={colors.success} />
+      ) : (
+        <SvgIcon name="copy" size={size} color="#94A3B8" />
+      )}
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    padding: 4,
+  },
+  disabledContainer: {
+    opacity: 0.6,
+  },
+  disabledText: {
+    fontSize: 10,
+    color: '#64748B',
+    fontStyle: 'italic',
+  },
+});

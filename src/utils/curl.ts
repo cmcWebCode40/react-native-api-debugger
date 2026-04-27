@@ -1,6 +1,19 @@
 import type { NetworkLog } from '../types';
 
-export const generateCurl = (log: NetworkLog): string => {
+export interface CurlOptions {
+  redact?: boolean;
+}
+
+const CURL_MASK = 'xxxxxxxxxxxx';
+
+export const generateCurl = (
+  log: NetworkLog,
+  options: CurlOptions = { redact: true }
+): string => {
+  if (options.redact) {
+    return `curl -X ${log.method} \\${CURL_MASK}`;
+  }
+
   let curl = `curl -X ${log.method}`;
 
   if (log.headers && typeof log.headers === 'object') {
@@ -20,7 +33,14 @@ export const generateCurl = (log: NetworkLog): string => {
   return curl;
 };
 
-export const generateCurlOneLine = (log: NetworkLog): string => {
+export const generateCurlOneLine = (
+  log: NetworkLog,
+  options: CurlOptions = { redact: true }
+): string => {
+  if (options.redact) {
+    return `curl -X ${log.method} \\${CURL_MASK}`;
+  }
+
   let curl = `curl -X ${log.method}`;
 
   if (log.headers && typeof log.headers === 'object') {

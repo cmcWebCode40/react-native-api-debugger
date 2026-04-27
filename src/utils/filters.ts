@@ -12,14 +12,12 @@ export interface FilterState {
   searchTerm: string;
   statusFilter: StatusFilterKey;
   methodFilter: string | null;
-  apiOnly: boolean;
 }
 
 export const defaultFilterState: FilterState = {
   searchTerm: '',
   statusFilter: 'all',
   methodFilter: null,
-  apiOnly: false,
 };
 
 export const matchesSearchTerm = (
@@ -69,14 +67,6 @@ export const matchesMethodFilter = (
   return log.method.toUpperCase() === methodFilter.toUpperCase();
 };
 
-export const matchesApiFilter = (
-  log: NetworkLog,
-  apiOnly: boolean
-): boolean => {
-  if (!apiOnly) return true;
-  return log.url.toLowerCase().includes('api');
-};
-
 export const filterLogs = (
   logs: NetworkLog[],
   filters: FilterState
@@ -85,8 +75,7 @@ export const filterLogs = (
     return (
       matchesSearchTerm(log, filters.searchTerm) &&
       matchesStatusFilter(log, filters.statusFilter) &&
-      matchesMethodFilter(log, filters.methodFilter) &&
-      matchesApiFilter(log, filters.apiOnly)
+      matchesMethodFilter(log, filters.methodFilter)
     );
   });
 };
