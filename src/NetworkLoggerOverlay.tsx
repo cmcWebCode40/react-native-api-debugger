@@ -489,10 +489,11 @@ const createThemedStyles = (themeColors: ThemeColors) => ({
     fontWeight: '500',
   } as TextStyle,
   emptyContainer: {
-    flex: 1,
+    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
+    marginTop: '25%',
   } as ViewStyle,
   emptyIconContainer: {
     width: 80,
