@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, SafeAreaView, View } from 'react-native';
 import {
-  DebuggerOverlay,
+  NetworkLoggerOverlay,
   networkLogger,
   webSocketLogger,
 } from 'react-native-api-debugger';
@@ -54,7 +54,7 @@ const App: React.FC = () => {
           activeTab={activeTab}
           onTabPress={setActiveTab}
         />
-        <DebuggerOverlay
+        <NetworkLoggerOverlay
           draggable={true}
           enableDeviceShake={false}
           useCopyToClipboard={true}

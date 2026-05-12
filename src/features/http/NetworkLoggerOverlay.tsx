@@ -52,7 +52,7 @@ try {
 
 type ActiveTab = 'http' | 'websocket';
 
-interface DebuggerOverlayProps {
+interface NetworkLoggerOverlayProps {
   networkLogger: NetworkLogger;
   webSocketLogger?: IWebSocketLogger;
   enabled?: boolean;
@@ -66,10 +66,10 @@ interface DebuggerOverlayProps {
   onThemeChange?: (theme: ThemeMode) => void;
 }
 
-class DebuggerSetupError extends Error {
+class NetworkLoggerSetupError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'DebuggerSetupError';
+    this.name = 'NetworkLoggerSetupError';
   }
 }
 
@@ -81,7 +81,7 @@ const STATUS_FILTERS: { key: StatusFilterKey; label: string }[] = [
   { key: 'serverError', label: '5xx' },
 ];
 
-export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
+export const NetworkLoggerOverlay: React.FC<NetworkLoggerOverlayProps> = ({
   draggable,
   networkLogger,
   webSocketLogger,
@@ -123,7 +123,7 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
   useEffect(() => {
     if (enabled && !__DEV__) {
       console.warn(
-        '[DebuggerOverlay] Warning: Debugger is enabled in production mode. ' +
+        '[NetworkLoggerOverlay] Warning: Debugger is enabled in production mode. ' +
           'This may expose sensitive data. Set enabled={false} or remove the prop to disable in production.'
       );
     }
@@ -134,8 +134,8 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
 
     // Validate HTTP interceptor setup
     if (!networkLogger.isSetup()) {
-      throw new DebuggerSetupError(
-        '[DebuggerOverlay] HTTP interceptor not initialized.\n\n' +
+      throw new NetworkLoggerSetupError(
+        '[NetworkLoggerOverlay] HTTP interceptor not initialized.\n\n' +
           'Please call networkLogger.setupInterceptor() before rendering DebuggerOverlay.\n\n' +
           'Example:\n' +
           '  useEffect(() => {\n' +
@@ -148,8 +148,8 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
     // Validate WebSocket interceptor setup if enabled
     if (enableWebSocket) {
       if (!webSocketLogger) {
-        throw new DebuggerSetupError(
-          '[DebuggerOverlay] WebSocket debugging is enabled but webSocketLogger prop is missing.\n\n' +
+        throw new NetworkLoggerSetupError(
+          '[NetworkLoggerOverlay] WebSocket debugging is enabled but webSocketLogger prop is missing.\n\n' +
             'Please pass the webSocketLogger prop when enableWebSocket={true}.\n\n' +
             'Example:\n' +
             '  import { webSocketLogger, DebuggerOverlay } from "react-native-api-debugger";\n\n' +
@@ -162,8 +162,8 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
       }
 
       if (!webSocketLogger.isSetup()) {
-        throw new DebuggerSetupError(
-          '[DebuggerOverlay] WebSocket interceptor not initialized.\n\n' +
+        throw new NetworkLoggerSetupError(
+          '[NetworkLoggerOverlay] WebSocket interceptor not initialized.\n\n' +
             'Please call webSocketLogger.setupInterceptor() before rendering DebuggerOverlay with enableWebSocket={true}.\n\n' +
             'Example:\n' +
             '  useEffect(() => {\n' +
@@ -181,8 +181,8 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
       : undefined;
 
     if (enableDeviceShake && !RNShake) {
-      throw new DebuggerSetupError(
-        '[DebuggerOverlay] react-native-shake is required for enableDeviceShake but module is not installed.\n\n' +
+      throw new NetworkLoggerSetupError(
+        '[NetworkLoggerOverlay] react-native-shake is required for enableDeviceShake but module is not installed.\n\n' +
           'Please install it with:\n' +
           '  npm install react-native-shake\n\n' +
           'Or disable device shake:\n' +
@@ -957,4 +957,4 @@ const staticStyles = {
   } as ViewStyle,
 };
 
-export type { DebuggerOverlayProps };
+export type { NetworkLoggerOverlayProps };

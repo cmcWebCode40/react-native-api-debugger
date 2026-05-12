@@ -109,7 +109,7 @@ export default function App() {
 
 ### 2. Full Setup (HTTP + WebSocket)
 
-Use `DebuggerOverlay` with `enableWebSocket={true}` for the unified tabbed interface.
+Use `NetworkLoggerOverlay` with `enableWebSocket={true}` for the unified tabbed interface.
 
 ```tsx
 import React, { useEffect } from 'react';
@@ -117,7 +117,7 @@ import { View } from 'react-native';
 import { 
   networkLogger, 
   webSocketLogger, 
-  DebuggerOverlay 
+  NetworkLoggerOverlay 
 } from 'react-native-api-debugger';
 
 export default function App() {
@@ -133,7 +133,7 @@ export default function App() {
     <View style={{ flex: 1 }}>
       {/* Your app content */}
       
-      <DebuggerOverlay
+      <NetworkLoggerOverlay
         networkLogger={networkLogger}
         webSocketLogger={webSocketLogger}
         enableWebSocket={true}
@@ -153,7 +153,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { 
   networkLogger, 
   webSocketLogger, 
-  DebuggerOverlay 
+  NetworkLoggerOverlay 
 } from 'react-native-api-debugger';
 
 export default function App() {
@@ -166,7 +166,7 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/* Your app content */}
       
-      <DebuggerOverlay
+      <NetworkLoggerOverlay
         networkLogger={networkLogger}
         webSocketLogger={webSocketLogger}
         enableWebSocket={true}
@@ -180,7 +180,7 @@ export default function App() {
 ### 4. Full Featured Setup
 
 ```tsx
-<DebuggerOverlay
+<NetworkLoggerOverlay
   networkLogger={networkLogger}
   webSocketLogger={webSocketLogger}
   enableWebSocket={true}
@@ -385,7 +385,7 @@ webSocketLogger.restoreInterceptor();
 
 ## API Reference
 
-### DebuggerOverlay Props
+### NetworkLoggerOverlay Props
 
 The unified overlay component with HTTP and optional WebSocket tabs.
 
@@ -543,11 +543,11 @@ useEffect(() => {
 
 Ensure you have:
 1. Called `webSocketLogger.setupInterceptor()` before any WebSocket connections
-2. Set `enableWebSocket={true}` on the DebuggerOverlay
+2. Set `enableWebSocket={true}` on the NetworkLoggerOverlay
 3. Passed the `webSocketLogger` prop
 
 ```tsx
-<DebuggerOverlay
+<NetworkLoggerOverlay
   networkLogger={networkLogger}
   webSocketLogger={webSocketLogger}
   enableWebSocket={true}  // Required to show WebSocket tab
