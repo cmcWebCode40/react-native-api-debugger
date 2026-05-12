@@ -1,6 +1,6 @@
 # React Native API Debugger
 
-A network request debugging tool for React Native applications. Monitor, inspect, and debug HTTP requests with a draggable overlay interface.
+A comprehensive network debugging tool for React Native applications. Monitor, inspect, and debug HTTP requests and WebSocket connections with a unified tabbed overlay interface.
 
 [![npm version](https://img.shields.io/npm/v/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
 [![downloads](https://img.shields.io/npm/dm/react-native-api-debugger)](https://www.npmjs.com/package/react-native-api-debugger)
@@ -10,16 +10,29 @@ A network request debugging tool for React Native applications. Monitor, inspect
 
 ## Features
 
+### HTTP Debugging
 - **Network Interception** - Automatically captures all `fetch()` and `XMLHttpRequest` calls
-- **Draggable Overlay** - Floating button that can be positioned anywhere on screen
 - **Request Details** - View headers, body, response, timing, and status codes
 - **cURL Export** - Copy requests as cURL commands
 - **Advanced Filtering** - Filter by status code (2xx, 3xx, 4xx, 5xx), search by URL/method/body
 - **Export Logs** - Export to HAR, Postman Collection, or JSON formats
 - **Request Replay** - Re-execute captured requests with optional modifications
-- **Dark/Light Theme** - Toggle between themes
 - **Slow Request Detection** - Visual indicator for requests exceeding threshold
 - **Sensitive Data Redaction** - Detect and mask sensitive headers and body fields
+
+### WebSocket Debugging
+- **WebSocket Interception** - Automatically captures all WebSocket connections
+- **Connection Monitoring** - Track connection state (connecting, open, closing, closed)
+- **Message Logging** - View sent and received messages with timestamps
+- **Message Filtering** - Filter by direction (sent/received) or search by content
+- **Binary Support** - Handles text and binary message types
+- **Connection Metrics** - Track message counts, bytes transferred, and connection duration
+- **Live Indicators** - Visual indicators for active connections
+
+### General
+- **Unified Interface** - Tabbed modal with HTTP and WebSocket views
+- **Draggable Overlay** - Floating button that can be positioned anywhere on screen
+- **Dark/Light Theme** - Toggle between themes
 - **Individual Log Deletion** - Remove specific entries without clearing all logs
 - **Device Shake Support** - Shake to show/hide the debugger
 - **TypeScript Support** - Full type definitions included
@@ -67,7 +80,7 @@ npm install react-native-svg
 
 ## Quick Setup
 
-### 1. Basic Usage (No Dependencies)
+### 1. Basic Usage (HTTP Only)
 
 ```tsx
 import React, { useEffect } from 'react';
@@ -94,25 +107,67 @@ export default function App() {
 }
 ```
 
-### 2. With Draggable Button
+### 2. Full Setup (HTTP + WebSocket)
+
+Use `DebuggerOverlay` for the unified tabbed interface with both HTTP and WebSocket support.
+
+```tsx
+import React, { useEffect } from 'react';
+import { View } from 'react-native';
+import { 
+  networkLogger, 
+  webSocketLogger, 
+  DebuggerOverlay 
+} from 'react-native-api-debugger';
+
+export default function App() {
+  useEffect(() => {
+    // Setup HTTP interceptor
+    networkLogger.setupInterceptor();
+    
+    // Setup WebSocket interceptor
+    webSocketLogger.setupInterceptor();
+  }, []);
+
+  return (
+    <View style={{ flex: 1 }}>
+      {/* Your app content */}
+      
+      <DebuggerOverlay
+        networkLogger={networkLogger}
+        webSocketLogger={webSocketLogger}
+        draggable={false}
+      />
+    </View>
+  );
+}
+```
+
+### 3. With Draggable Button
 
 Requires `react-native-gesture-handler` and `react-native-reanimated`.
 
 ```tsx
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { networkLogger, NetworkLoggerOverlay } from 'react-native-api-debugger';
+import { 
+  networkLogger, 
+  webSocketLogger, 
+  DebuggerOverlay 
+} from 'react-native-api-debugger';
 
 export default function App() {
   useEffect(() => {
     networkLogger.setupInterceptor();
+    webSocketLogger.setupInterceptor();
   }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       {/* Your app content */}
       
-      <NetworkLoggerOverlay
+      <DebuggerOverlay
         networkLogger={networkLogger}
+        webSocketLogger={webSocketLogger}
         draggable={true}
       />
     </GestureHandlerRootView>
@@ -120,17 +175,18 @@ export default function App() {
 }
 ```
 
-### 3. Full Featured Setup
+### 4. Full Featured Setup
 
 ```tsx
-<NetworkLoggerOverlay
+<DebuggerOverlay
   networkLogger={networkLogger}
+  webSocketLogger={webSocketLogger}
   draggable={true}
   enableDeviceShake={true}
   useCopyToClipboard={true}
   showRequestHeader={true}
   showResponseHeader={true}
-  theme="light"
+  theme="dark"
   onThemeChange={(theme) => console.log('Theme:', theme)}
 />
 ```
@@ -197,11 +253,18 @@ const config = networkLogger.getConfig();
 
 ```tsx
 useEffect(() => {
-  const unsubscribe = networkLogger.subscribe((logs) => {
-    console.log('Logs updated:', logs.length);
+  const unsubscribeHttp = networkLogger.subscribe((logs) => {
+    console.log('HTTP logs updated:', logs.length);
   });
   
-  return () => unsubscribe();
+  const unsubscribeWs = webSocketLogger.subscribe((logs) => {
+    console.log('WebSocket logs updated:', logs.length);
+  });
+  
+  return () => {
+    unsubscribeHttp();
+    unsubscribeWs();
+  };
 }, []);
 ```
 
@@ -273,11 +336,72 @@ const curlCommand = generateCurl(log);
 // curl -X POST 'https://api.example.com/users' -H 'Content-Type: application/json' -d '{"name":"John"}'
 ```
 
+### WebSocket Logger Methods
+
+```tsx
+import { webSocketLogger } from 'react-native-api-debugger';
+
+// Initialize interception
+webSocketLogger.setupInterceptor();
+
+// Configure options
+webSocketLogger.configure({
+  maxConnections: 50,           // Maximum connections to store
+  captureMessages: true,        // Log individual messages
+  maxMessagesPerConnection: 100, // Max messages per connection
+  ignoredUrls: ['*/health'],    // URL patterns to ignore
+});
+
+// Get all logs
+const logs = webSocketLogger.getLogs();
+
+// Get log count
+const count = webSocketLogger.getLogCount();
+
+// Clear all logs
+webSocketLogger.clearLogs();
+
+// Delete a specific log
+webSocketLogger.deleteLog(logId);
+
+// Close an active connection
+webSocketLogger.closeConnection(logId);
+
+// Enable/disable logging
+webSocketLogger.enable();
+webSocketLogger.disable();
+
+// Get active connections count
+const activeCount = webSocketLogger.getActiveConnectionsCount();
+
+// Restore original WebSocket (remove interception)
+webSocketLogger.restoreInterceptor();
+```
+
 ---
 
 ## API Reference
 
+### DebuggerOverlay Props
+
+The unified overlay component with HTTP and WebSocket tabs.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `networkLogger` | `NetworkLogger` | Required | HTTP logger instance |
+| `webSocketLogger` | `WebSocketLogger` | Optional | WebSocket logger instance |
+| `enabled` | `boolean` | `__DEV__` | Enable/disable the overlay |
+| `draggable` | `boolean` | `false` | Enable draggable button |
+| `enableDeviceShake` | `boolean` | `false` | Show on device shake |
+| `useCopyToClipboard` | `boolean` | `false` | Enable clipboard copy |
+| `showRequestHeader` | `boolean` | `false` | Show request headers |
+| `showResponseHeader` | `boolean` | `false` | Show response headers |
+| `theme` | `'light' \| 'dark'` | `'dark'` | Color theme |
+| `onThemeChange` | `(theme) => void` | - | Theme change callback |
+
 ### NetworkLoggerOverlay Props
+
+HTTP-only overlay component (legacy, use `DebuggerOverlay` for new projects).
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -327,6 +451,46 @@ interface NetworkLog {
   bookmarked?: boolean;
 }
 ```
+
+### WebSocketLog Type
+
+```typescript
+interface WebSocketLog {
+  id: number;
+  url: string;
+  state: 'connecting' | 'open' | 'closing' | 'closed';
+  protocols?: string[];
+  connectTime: string;
+  openTime?: string;
+  closeTime?: string;
+  closeCode?: number;
+  closeReason?: string;
+  error?: string;
+  handshakeDuration?: number;
+  messages: WebSocketMessage[];
+  messageCount: { sent: number; received: number };
+  bytesReceived: number;
+  bytesSent: number;
+}
+
+interface WebSocketMessage {
+  id: number;
+  direction: 'sent' | 'received';
+  data: string;
+  dataType: 'text' | 'binary';
+  timestamp: string;
+  size: number;
+}
+```
+
+### WebSocketLoggerConfig
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `maxConnections` | `number` | `100` | Maximum connections to store |
+| `captureMessages` | `boolean` | `true` | Log individual messages |
+| `maxMessagesPerConnection` | `number` | `100` | Max messages per connection |
+| `ignoredUrls` | `string[]` | `[]` | URL patterns to ignore |
 
 ---
 
@@ -383,7 +547,20 @@ Make sure `setupInterceptor()` is called before any network requests:
 ```tsx
 useEffect(() => {
   networkLogger.setupInterceptor();
+  webSocketLogger.setupInterceptor();
 }, []); // Empty dependency array - runs once on mount
+```
+
+### WebSocket connections not appearing
+
+Ensure the WebSocket interceptor is set up before any WebSocket connections are created, and pass the `webSocketLogger` to `DebuggerOverlay`:
+
+```tsx
+<DebuggerOverlay
+  networkLogger={networkLogger}
+  webSocketLogger={webSocketLogger}  // Don't forget this!
+  draggable={true}
+/>
 ```
 
 ---
