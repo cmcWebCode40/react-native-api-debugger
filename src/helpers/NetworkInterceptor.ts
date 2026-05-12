@@ -3,9 +3,9 @@ import type {
   NetworkLog,
   NetworkLoggerConfig,
   NetworkRequestHeaders,
-} from './types';
-import { DEFAULT_CONFIG } from './constants/config';
-import { shouldIgnoreUrl, shouldIgnoreDomain } from './utils/filters';
+} from '../types';
+import { DEFAULT_CONFIG } from '../constants/config';
+import { shouldIgnoreUrl, shouldIgnoreDomain } from '../utils/filters';
 
 interface CustomXMLHttpRequest extends XMLHttpRequest {
   open: (method: string, url: string) => void;

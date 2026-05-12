@@ -49,3 +49,71 @@ export interface NetworkLogger {
   configure?: (config: Partial<NetworkLoggerConfig>) => void;
   getConfig?: () => NetworkLoggerConfig;
 }
+
+// ============================================
+// WebSocket Types
+// ============================================
+
+export type WebSocketState = 'connecting' | 'open' | 'closing' | 'closed';
+
+export type WebSocketMessageDirection = 'sent' | 'received';
+
+export type WebSocketDataType = 'text' | 'binary';
+
+export interface WebSocketMessage {
+  id: number;
+  direction: WebSocketMessageDirection;
+  data: string;
+  dataType: WebSocketDataType;
+  timestamp: string;
+  size: number;
+}
+
+export interface WebSocketLog {
+  id: number;
+  url: string;
+  state: WebSocketState;
+  protocols?: string[];
+
+  // Connection lifecycle
+  connectTime: string;
+  openTime?: string;
+  closeTime?: string;
+  closeCode?: number;
+  closeReason?: string;
+
+  // Messages
+  messages: WebSocketMessage[];
+  messageCount: { sent: number; received: number };
+
+  // Errors
+  error?: string;
+
+  // Metadata
+  handshakeDuration?: number;
+  bytesReceived: number;
+  bytesSent: number;
+}
+
+export interface WebSocketLoggerConfig {
+  maxConnections: number;
+  maxMessagesPerConnection: number;
+  ignoredUrls: string[];
+  captureMessages: boolean;
+}
+
+export type WebSocketLogListener = (logs: WebSocketLog[]) => void;
+
+export interface IWebSocketLogger {
+  subscribe: (listener: WebSocketLogListener) => () => void;
+  clearLogs: () => void;
+  deleteLog: (logId: number) => void;
+  enable: () => void;
+  disable: () => void;
+  getLogs?: () => WebSocketLog[];
+  getLogCount?: () => number;
+  isLoggerEnabled?: () => boolean;
+  configure?: (config: Partial<WebSocketLoggerConfig>) => void;
+  getConfig?: () => WebSocketLoggerConfig;
+  closeConnection?: (logId: number) => void;
+}

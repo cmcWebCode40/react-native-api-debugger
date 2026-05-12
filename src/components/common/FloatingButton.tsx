@@ -6,9 +6,9 @@ import {
   Dimensions,
 } from 'react-native';
 import React, { useEffect } from 'react';
-import { SvgIcon } from './SvgIcon';
+import { SvgIcon } from '../../icons';
 import NonFloatingButton from './NonFloatingButton';
-import { colors, getThemeColors, type ThemeMode } from './constants/colors';
+import { colors, getThemeColors, type ThemeMode } from '../../constants/colors';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 

@@ -1,4 +1,4 @@
-import type { NetworkLoggerConfig } from '../types';
+import type { NetworkLoggerConfig, WebSocketLoggerConfig } from '../types';
 
 export const DEFAULT_CONFIG: NetworkLoggerConfig = {
   maxLogs: 100,
@@ -45,6 +45,13 @@ export const FILTER_OPTIONS = {
   ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
 } as const;
+
+export const DEFAULT_WS_CONFIG: WebSocketLoggerConfig = {
+  maxConnections: 50,
+  maxMessagesPerConnection: 500,
+  ignoredUrls: [],
+  captureMessages: true,
+};
 
 export const UI_CONFIG = {
   floatingButton: {

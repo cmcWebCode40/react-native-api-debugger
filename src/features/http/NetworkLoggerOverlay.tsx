@@ -15,20 +15,26 @@ import {
 } from 'react-native';
 
 import NetworkLogItem from './NetworkLogItem';
-import type { NetworkLog, NetworkLogger } from './types';
-import type { StatusFilterKey } from './utils/filters';
-import FloatingButton from './FloatingButton';
-import NonFloatingButton from './NonFloatingButton';
+import type { NetworkLog, NetworkLogger } from '../../types';
+import type { StatusFilterKey } from '../../utils/filters';
+import {
+  FloatingButton,
+  NonFloatingButton,
+  ExportModal,
+} from '../../components/common';
 import {
   colors,
   getThemeColors,
   type ThemeMode,
   type ThemeColors,
-} from './constants/colors';
-import { filterLogs, getLogStats, defaultFilterState } from './utils/filters';
-import type { FilterState } from './utils/filters';
-import { ExportModal } from './components/ExportModal';
-import { SvgIcon } from './SvgIcon';
+} from '../../constants/colors';
+import {
+  filterLogs,
+  getLogStats,
+  defaultFilterState,
+} from '../../utils/filters';
+import type { FilterState } from '../../utils/filters';
+import { SvgIcon } from '../../icons';
 
 let RNShake: any = null;
 

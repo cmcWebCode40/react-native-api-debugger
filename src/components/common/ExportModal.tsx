@@ -11,15 +11,15 @@ import {
   type ViewStyle,
   type TextStyle,
 } from 'react-native';
-import type { NetworkLog } from '../types';
-import type { ThemeMode, ThemeColors } from '../constants/colors';
-import { getThemeColors } from '../constants/colors';
+import type { NetworkLog } from '../../types';
+import type { ThemeMode, ThemeColors } from '../../constants/colors';
+import { getThemeColors } from '../../constants/colors';
 import {
   exportLogs,
   getExportFileName,
   type ExportFormat,
-} from '../utils/export';
-import { SvgIcon, type IconName } from '../SvgIcon';
+} from '../../utils/export';
+import { SvgIcon, type IconName } from '../../icons';
 
 interface ExportModalProps {
   visible: boolean;
