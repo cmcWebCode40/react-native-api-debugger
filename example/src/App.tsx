@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, SafeAreaView, View } from 'react-native';
-import { networkLogger, NetworkLoggerOverlay } from 'react-native-api-debugger';
+import {
+  DebuggerOverlay,
+  networkLogger,
+  webSocketLogger,
+} from 'react-native-api-debugger';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NetworkScreen } from './screens/NetworkScreen';
 import { WebSocketScreen } from './screens/WebSocketScreen';
@@ -23,6 +27,7 @@ const App: React.FC = () => {
       slowRequestThreshold: 2000,
     });
     networkLogger.setupInterceptor();
+    webSocketLogger.setupInterceptor();
   }, []);
 
   const renderScreen = () => {
@@ -49,13 +54,15 @@ const App: React.FC = () => {
           activeTab={activeTab}
           onTabPress={setActiveTab}
         />
-        <NetworkLoggerOverlay
+        <DebuggerOverlay
           draggable={true}
           enableDeviceShake={false}
           useCopyToClipboard={true}
           showRequestHeader={showHeaders}
           showResponseHeader={showHeaders}
           networkLogger={networkLogger}
+          webSocketLogger={webSocketLogger}
+          enableWebSocket={true}
         />
       </SafeAreaView>
     </GestureHandlerRootView>

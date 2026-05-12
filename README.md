@@ -109,7 +109,7 @@ export default function App() {
 
 ### 2. Full Setup (HTTP + WebSocket)
 
-Use `DebuggerOverlay` for the unified tabbed interface with both HTTP and WebSocket support.
+Use `DebuggerOverlay` with `enableWebSocket={true}` for the unified tabbed interface.
 
 ```tsx
 import React, { useEffect } from 'react';
@@ -136,6 +136,7 @@ export default function App() {
       <DebuggerOverlay
         networkLogger={networkLogger}
         webSocketLogger={webSocketLogger}
+        enableWebSocket={true}
         draggable={false}
       />
     </View>
@@ -168,6 +169,7 @@ export default function App() {
       <DebuggerOverlay
         networkLogger={networkLogger}
         webSocketLogger={webSocketLogger}
+        enableWebSocket={true}
         draggable={true}
       />
     </GestureHandlerRootView>
@@ -181,6 +183,7 @@ export default function App() {
 <DebuggerOverlay
   networkLogger={networkLogger}
   webSocketLogger={webSocketLogger}
+  enableWebSocket={true}
   draggable={true}
   enableDeviceShake={true}
   useCopyToClipboard={true}
@@ -384,29 +387,14 @@ webSocketLogger.restoreInterceptor();
 
 ### DebuggerOverlay Props
 
-The unified overlay component with HTTP and WebSocket tabs.
+The unified overlay component with HTTP and optional WebSocket tabs.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `networkLogger` | `NetworkLogger` | Required | HTTP logger instance |
-| `webSocketLogger` | `WebSocketLogger` | Optional | WebSocket logger instance |
+| `webSocketLogger` | `WebSocketLogger` | - | WebSocket logger instance (required if `enableWebSocket` is true) |
 | `enabled` | `boolean` | `__DEV__` | Enable/disable the overlay |
-| `draggable` | `boolean` | `false` | Enable draggable button |
-| `enableDeviceShake` | `boolean` | `false` | Show on device shake |
-| `useCopyToClipboard` | `boolean` | `false` | Enable clipboard copy |
-| `showRequestHeader` | `boolean` | `false` | Show request headers |
-| `showResponseHeader` | `boolean` | `false` | Show response headers |
-| `theme` | `'light' \| 'dark'` | `'dark'` | Color theme |
-| `onThemeChange` | `(theme) => void` | - | Theme change callback |
-
-### NetworkLoggerOverlay Props
-
-HTTP-only overlay component (legacy, use `DebuggerOverlay` for new projects).
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `networkLogger` | `NetworkLogger` | Required | The logger instance |
-| `enabled` | `boolean` | `__DEV__` | Enable/disable the overlay |
+| `enableWebSocket` | `boolean` | `false` | Enable WebSocket debugging tab |
 | `draggable` | `boolean` | `false` | Enable draggable button |
 | `enableDeviceShake` | `boolean` | `false` | Show on device shake |
 | `useCopyToClipboard` | `boolean` | `false` | Enable clipboard copy |
@@ -553,15 +541,28 @@ useEffect(() => {
 
 ### WebSocket connections not appearing
 
-Ensure the WebSocket interceptor is set up before any WebSocket connections are created, and pass the `webSocketLogger` to `DebuggerOverlay`:
+Ensure you have:
+1. Called `webSocketLogger.setupInterceptor()` before any WebSocket connections
+2. Set `enableWebSocket={true}` on the DebuggerOverlay
+3. Passed the `webSocketLogger` prop
 
 ```tsx
 <DebuggerOverlay
   networkLogger={networkLogger}
-  webSocketLogger={webSocketLogger}  // Don't forget this!
+  webSocketLogger={webSocketLogger}
+  enableWebSocket={true}  // Required to show WebSocket tab
   draggable={true}
 />
 ```
+
+### Setup error messages
+
+The debugger will throw helpful error messages if interceptors aren't initialized:
+
+- **HTTP**: If `networkLogger.setupInterceptor()` wasn't called before rendering
+- **WebSocket**: If `enableWebSocket={true}` but `webSocketLogger.setupInterceptor()` wasn't called
+
+These errors include code examples to help you fix the issue quickly.
 
 ---
 

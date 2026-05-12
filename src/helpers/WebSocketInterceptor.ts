@@ -13,11 +13,13 @@ class WebSocketLogger {
   private config: WebSocketLoggerConfig = { ...DEFAULT_WS_CONFIG };
   private connectionMap: Map<WebSocket, WebSocketLog> = new Map();
   private originalWebSocket: typeof WebSocket | null = null;
+  private isInterceptorSetup: boolean = false;
 
   constructor(config?: Partial<WebSocketLoggerConfig>) {
     this.logs = [];
     this.listeners = [];
     this.isEnabled = true;
+    this.isInterceptorSetup = false;
     if (config) {
       this.config = { ...DEFAULT_WS_CONFIG, ...config };
     }
@@ -70,6 +72,7 @@ class WebSocketLogger {
   public setupInterceptor(): void {
     if (!this.isEnabled) return;
     if (typeof global.WebSocket === 'undefined') return;
+    this.isInterceptorSetup = true;
 
     this.originalWebSocket = global.WebSocket;
     // eslint-disable-next-line consistent-this
@@ -387,6 +390,10 @@ class WebSocketLogger {
       }
     }
     return count;
+  }
+
+  public isSetup(): boolean {
+    return this.isInterceptorSetup;
   }
 }
 

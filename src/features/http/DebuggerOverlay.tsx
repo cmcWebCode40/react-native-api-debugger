@@ -56,6 +56,7 @@ interface DebuggerOverlayProps {
   networkLogger: NetworkLogger;
   webSocketLogger?: IWebSocketLogger;
   enabled?: boolean;
+  enableWebSocket?: boolean;
   enableDeviceShake?: boolean;
   showRequestHeader?: boolean;
   showResponseHeader?: boolean;
@@ -63,6 +64,13 @@ interface DebuggerOverlayProps {
   useCopyToClipboard?: boolean;
   theme?: ThemeMode;
   onThemeChange?: (theme: ThemeMode) => void;
+}
+
+class DebuggerSetupError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DebuggerSetupError';
+  }
 }
 
 const STATUS_FILTERS: { key: StatusFilterKey; label: string }[] = [
@@ -78,6 +86,7 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
   networkLogger,
   webSocketLogger,
   enabled = __DEV__,
+  enableWebSocket = false,
   enableDeviceShake,
   showRequestHeader,
   showResponseHeader,
@@ -123,12 +132,61 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
   useEffect(() => {
     if (!enabled) return;
 
+    // Validate HTTP interceptor setup
+    if (!networkLogger.isSetup()) {
+      throw new DebuggerSetupError(
+        '[DebuggerOverlay] HTTP interceptor not initialized.\n\n' +
+          'Please call networkLogger.setupInterceptor() before rendering DebuggerOverlay.\n\n' +
+          'Example:\n' +
+          '  useEffect(() => {\n' +
+          '    networkLogger.setupInterceptor();\n' +
+          '  }, []);\n\n' +
+          'Make sure this is called BEFORE any network requests are made.'
+      );
+    }
+
+    // Validate WebSocket interceptor setup if enabled
+    if (enableWebSocket) {
+      if (!webSocketLogger) {
+        throw new DebuggerSetupError(
+          '[DebuggerOverlay] WebSocket debugging is enabled but webSocketLogger prop is missing.\n\n' +
+            'Please pass the webSocketLogger prop when enableWebSocket={true}.\n\n' +
+            'Example:\n' +
+            '  import { webSocketLogger, DebuggerOverlay } from "react-native-api-debugger";\n\n' +
+            '  <DebuggerOverlay\n' +
+            '    networkLogger={networkLogger}\n' +
+            '    webSocketLogger={webSocketLogger}\n' +
+            '    enableWebSocket={true}\n' +
+            '  />'
+        );
+      }
+
+      if (!webSocketLogger.isSetup()) {
+        throw new DebuggerSetupError(
+          '[DebuggerOverlay] WebSocket interceptor not initialized.\n\n' +
+            'Please call webSocketLogger.setupInterceptor() before rendering DebuggerOverlay with enableWebSocket={true}.\n\n' +
+            'Example:\n' +
+            '  useEffect(() => {\n' +
+            '    networkLogger.setupInterceptor();\n' +
+            '    webSocketLogger.setupInterceptor();\n' +
+            '  }, []);\n\n' +
+            'Make sure this is called BEFORE any WebSocket connections are made.'
+        );
+      }
+    }
+
     const unsubscribeNetwork = networkLogger.subscribe(setLogs);
-    const unsubscribeWs = webSocketLogger?.subscribe(setWsLogs);
+    const unsubscribeWs = enableWebSocket
+      ? webSocketLogger?.subscribe(setWsLogs)
+      : undefined;
 
     if (enableDeviceShake && !RNShake) {
-      throw new Error(
-        'react-native-shake is required to enableDeviceShake but module is not installed. Please install it with: npm install react-native-shake'
+      throw new DebuggerSetupError(
+        '[DebuggerOverlay] react-native-shake is required for enableDeviceShake but module is not installed.\n\n' +
+          'Please install it with:\n' +
+          '  npm install react-native-shake\n\n' +
+          'Or disable device shake:\n' +
+          '  <DebuggerOverlay enableDeviceShake={false} ... />'
       );
     }
 
@@ -146,7 +204,13 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
       unsubscribeWs?.();
       subscription?.remove();
     };
-  }, [networkLogger, webSocketLogger, enableDeviceShake, enabled]);
+  }, [
+    networkLogger,
+    webSocketLogger,
+    enableWebSocket,
+    enableDeviceShake,
+    enabled,
+  ]);
 
   const handleCloseIcon = useCallback(() => {
     setShowButton(false);
@@ -346,8 +410,10 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
     [themedStyles, themeColors, webSocketLogger]
   );
 
-  const totalLogs = logs.length + wsLogs.length;
-  const totalErrors = logStats.errors + wsStats.errors;
+  const totalLogs = enableWebSocket ? logs.length + wsLogs.length : logs.length;
+  const totalErrors = enableWebSocket
+    ? logStats.errors + wsStats.errors
+    : logStats.errors;
 
   const buttonProps = {
     draggable,
@@ -437,78 +503,80 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
             </View>
           </View>
 
-          {/* Tab Bar */}
-          <View style={themedStyles.tabBar}>
-            <TouchableOpacity
-              style={[
-                themedStyles.tab,
-                activeTab === 'http' && themedStyles.tabActive,
-              ]}
-              onPress={() => setActiveTab('http')}
-              activeOpacity={0.7}
-            >
-              <Text
+          {/* Tab Bar - Only show if WebSocket is enabled */}
+          {enableWebSocket && (
+            <View style={themedStyles.tabBar}>
+              <TouchableOpacity
                 style={[
-                  themedStyles.tabText,
-                  activeTab === 'http' && themedStyles.tabTextActive,
+                  themedStyles.tab,
+                  activeTab === 'http' && themedStyles.tabActive,
                 ]}
-              >
-                HTTP
-              </Text>
-              <View
-                style={[
-                  themedStyles.tabBadge,
-                  activeTab === 'http' && themedStyles.tabBadgeActive,
-                ]}
+                onPress={() => setActiveTab('http')}
+                activeOpacity={0.7}
               >
                 <Text
                   style={[
-                    themedStyles.tabBadgeText,
-                    activeTab === 'http' && themedStyles.tabBadgeTextActive,
+                    themedStyles.tabText,
+                    activeTab === 'http' && themedStyles.tabTextActive,
                   ]}
                 >
-                  {logs.length}
+                  HTTP
                 </Text>
-              </View>
-            </TouchableOpacity>
+                <View
+                  style={[
+                    themedStyles.tabBadge,
+                    activeTab === 'http' && themedStyles.tabBadgeActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      themedStyles.tabBadgeText,
+                      activeTab === 'http' && themedStyles.tabBadgeTextActive,
+                    ]}
+                  >
+                    {logs.length}
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                themedStyles.tab,
-                activeTab === 'websocket' && themedStyles.tabActive,
-              ]}
-              onPress={() => setActiveTab('websocket')}
-              activeOpacity={0.7}
-            >
-              <Text
+              <TouchableOpacity
                 style={[
-                  themedStyles.tabText,
-                  activeTab === 'websocket' && themedStyles.tabTextActive,
+                  themedStyles.tab,
+                  activeTab === 'websocket' && themedStyles.tabActive,
                 ]}
-              >
-                WS
-              </Text>
-              <View
-                style={[
-                  themedStyles.tabBadge,
-                  activeTab === 'websocket' && themedStyles.tabBadgeActive,
-                  wsStats.active > 0 && themedStyles.tabBadgeLive,
-                ]}
+                onPress={() => setActiveTab('websocket')}
+                activeOpacity={0.7}
               >
                 <Text
                   style={[
-                    themedStyles.tabBadgeText,
-                    activeTab === 'websocket' &&
-                      themedStyles.tabBadgeTextActive,
-                    wsStats.active > 0 && themedStyles.tabBadgeTextLive,
+                    themedStyles.tabText,
+                    activeTab === 'websocket' && themedStyles.tabTextActive,
                   ]}
                 >
-                  {wsLogs.length}
+                  WS
                 </Text>
-              </View>
-              {wsStats.active > 0 && <View style={staticStyles.liveDot} />}
-            </TouchableOpacity>
-          </View>
+                <View
+                  style={[
+                    themedStyles.tabBadge,
+                    activeTab === 'websocket' && themedStyles.tabBadgeActive,
+                    wsStats.active > 0 && themedStyles.tabBadgeLive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      themedStyles.tabBadgeText,
+                      activeTab === 'websocket' &&
+                        themedStyles.tabBadgeTextActive,
+                      wsStats.active > 0 && themedStyles.tabBadgeTextLive,
+                    ]}
+                  >
+                    {wsLogs.length}
+                  </Text>
+                </View>
+                {wsStats.active > 0 && <View style={staticStyles.liveDot} />}
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Search & Filters */}
           <View style={themedStyles.searchContainer}>
@@ -577,26 +645,28 @@ export const DebuggerOverlay: React.FC<DebuggerOverlayProps> = ({
             </View>
           )}
 
-          {activeTab === 'websocket' && wsLogs.length > 0 && (
-            <View style={themedStyles.statsBar}>
-              <Text style={themedStyles.statsText}>
-                {filteredWsLogs.length} of {wsLogs.length} connections
-              </Text>
-              {wsStats.active > 0 && (
-                <Text style={staticStyles.activeStats}>
-                  {wsStats.active} active
+          {enableWebSocket &&
+            activeTab === 'websocket' &&
+            wsLogs.length > 0 && (
+              <View style={themedStyles.statsBar}>
+                <Text style={themedStyles.statsText}>
+                  {filteredWsLogs.length} of {wsLogs.length} connections
                 </Text>
-              )}
-              {wsStats.errors > 0 && (
-                <Text style={staticStyles.errorStats}>
-                  {wsStats.errors} errors
-                </Text>
-              )}
-            </View>
-          )}
+                {wsStats.active > 0 && (
+                  <Text style={staticStyles.activeStats}>
+                    {wsStats.active} active
+                  </Text>
+                )}
+                {wsStats.errors > 0 && (
+                  <Text style={staticStyles.errorStats}>
+                    {wsStats.errors} errors
+                  </Text>
+                )}
+              </View>
+            )}
 
           {/* Log Lists */}
-          {activeTab === 'http' ? (
+          {activeTab === 'http' || !enableWebSocket ? (
             <FlatList
               data={filteredLogs}
               keyExtractor={(item) => item.id.toString()}

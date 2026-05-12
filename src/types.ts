@@ -46,6 +46,7 @@ export interface NetworkLogger {
   getLogs?: () => NetworkLog[];
   getLogCount?: () => number;
   isLoggerEnabled?: () => boolean;
+  isSetup: () => boolean;
   configure?: (config: Partial<NetworkLoggerConfig>) => void;
   getConfig?: () => NetworkLoggerConfig;
 }
@@ -113,6 +114,7 @@ export interface IWebSocketLogger {
   getLogs?: () => WebSocketLog[];
   getLogCount?: () => number;
   isLoggerEnabled?: () => boolean;
+  isSetup: () => boolean;
   configure?: (config: Partial<WebSocketLoggerConfig>) => void;
   getConfig?: () => WebSocketLoggerConfig;
   closeConnection?: (logId: number) => void;
