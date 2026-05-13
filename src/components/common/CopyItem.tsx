@@ -8,8 +8,8 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { SvgIcon } from './SvgIcon';
-import { colors } from './constants/colors';
+import { SvgIcon } from '../../icons';
+import { colors } from '../../constants/colors';
 
 let Clipboard: any = null;
 try {

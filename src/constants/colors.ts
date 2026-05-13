@@ -65,6 +65,16 @@ export const colors = {
     clientError: '#EF4444', // 4xx
     serverError: '#A855F7', // 5xx
   },
+
+  // WebSocket colors
+  websocket: {
+    connecting: '#F59E0B',
+    open: '#10B981',
+    closing: '#F97316',
+    closed: '#94A3B8',
+    sent: '#3B82F6',
+    received: '#10B981',
+  },
 } as const;
 
 export type ThemeMode = 'light' | 'dark';
@@ -104,4 +114,16 @@ export const getStatusColor = (status?: number): string => {
 export const getMethodColor = (method: string): string => {
   const upperMethod = method.toUpperCase() as keyof typeof colors.methods;
   return colors.methods[upperMethod] || colors.info;
+};
+
+export const getWebSocketStateColor = (
+  state: 'connecting' | 'open' | 'closing' | 'closed'
+): string => {
+  return colors.websocket[state] || colors.pending;
+};
+
+export const getWebSocketMessageColor = (
+  direction: 'sent' | 'received'
+): string => {
+  return colors.websocket[direction];
 };

@@ -7,8 +7,8 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import type { ThemeMode } from '../constants/colors';
-import { getThemeColors } from '../constants/colors';
+import type { ThemeMode } from '../../constants/colors';
+import { getThemeColors } from '../../constants/colors';
 
 interface JsonViewerProps {
   data: string | object | null;

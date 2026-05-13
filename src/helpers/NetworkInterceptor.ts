@@ -3,9 +3,9 @@ import type {
   NetworkLog,
   NetworkLoggerConfig,
   NetworkRequestHeaders,
-} from './types';
-import { DEFAULT_CONFIG } from './constants/config';
-import { shouldIgnoreUrl, shouldIgnoreDomain } from './utils/filters';
+} from '../types';
+import { DEFAULT_CONFIG } from '../constants/config';
+import { shouldIgnoreUrl, shouldIgnoreDomain } from '../utils/filters';
 
 interface CustomXMLHttpRequest extends XMLHttpRequest {
   open: (method: string, url: string) => void;
@@ -18,11 +18,13 @@ class NetworkLogger {
   private listeners: LogListener[] = [];
   private isEnabled: boolean = true;
   private config: NetworkLoggerConfig = { ...DEFAULT_CONFIG };
+  private isInterceptorSetup: boolean = false;
 
   constructor(config?: Partial<NetworkLoggerConfig>) {
     this.logs = [];
     this.listeners = [];
     this.isEnabled = true;
+    this.isInterceptorSetup = false;
     if (config) {
       this.config = { ...DEFAULT_CONFIG, ...config };
     }
@@ -56,6 +58,7 @@ class NetworkLogger {
 
   public setupInterceptor(): void {
     if (!this.isEnabled) return;
+    this.isInterceptorSetup = true;
 
     const originalFetch = global.fetch;
     // eslint-disable-next-line consistent-this
@@ -338,8 +341,12 @@ class NetworkLogger {
   public isLoggerEnabled(): boolean {
     return this.isEnabled;
   }
+
+  public isSetup(): boolean {
+    return this.isInterceptorSetup;
+  }
 }
 
-export const networkLogger: NetworkLogger = new NetworkLogger();
+export const networkLogger = new NetworkLogger();
 
 export type { NetworkLog, NetworkRequestHeaders, LogListener };

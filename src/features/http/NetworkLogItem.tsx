@@ -11,26 +11,26 @@ import {
   type ViewStyle,
   type TextStyle,
 } from 'react-native';
-import type { NetworkLog, NetworkRequestHeaders } from './types';
-import type { ThemeMode, ThemeColors } from './constants/colors';
+import type { NetworkLog, NetworkRequestHeaders } from '../../types';
+import type { ThemeMode, ThemeColors } from '../../constants/colors';
 import {
   colors,
   getThemeColors,
   getStatusColor,
   getMethodColor,
-} from './constants/colors';
-import { CopyItem } from './CopyItem';
-import { JsonViewer } from './components/JsonViewer';
-import { SvgIcon } from './SvgIcon';
-import { formatTimestamp } from './utils/formatters';
-import { generateCurl } from './utils/curl';
+} from '../../constants/colors';
+import { CopyItem } from '../../components/common';
+import { JsonViewer } from '../../components/common';
+import { SvgIcon } from '../../icons';
+import { formatTimestamp } from '../../utils/formatters';
+import { generateCurl } from '../../utils/curl';
 import {
   replayRequest,
   canReplayRequest,
   getReplayWarnings,
-} from './utils/replay';
-import { exportSingleRequestAsJSON } from './utils/export';
-import { detectSensitiveData, redactHeaders } from './utils/redact';
+} from '../../utils/replay';
+import { exportSingleRequestAsJSON } from '../../utils/export';
+import { detectSensitiveData, redactHeaders } from '../../utils/redact';
 
 interface NetworkLogItemProps {
   log: NetworkLog;

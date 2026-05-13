@@ -6,7 +6,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { colors } from '../constants/colors';
+import { colors } from '../../constants/colors';
 
 export type BadgeVariant = 'success' | 'warning' | 'error' | 'info' | 'pending';
 

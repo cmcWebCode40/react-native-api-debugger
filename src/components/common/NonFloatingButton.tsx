@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { SvgIcon } from './SvgIcon';
-import { colors, getThemeColors, type ThemeMode } from './constants/colors';
+import { SvgIcon } from '../../icons';
+import { colors, getThemeColors, type ThemeMode } from '../../constants/colors';
 
 interface NonFloatingButtonProps {
   openModal: () => void;
